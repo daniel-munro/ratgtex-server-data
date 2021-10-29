@@ -1,0 +1,1 @@
+sh run.sh ~/Documents/projects/ratgtex/data/ test/ Eye IL LHb NAcc OFC PL
