@@ -1,4 +1,4 @@
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse))
 
 args <- commandArgs(trailingOnly = TRUE)
 indir <- args[1]
@@ -20,19 +20,14 @@ expr <- tibble(tissueSiteDetailId = tissues) |>
         .groups = "drop"
     )
 
-egenes <- read_tsv(str_glue("{outdir}/eqtl/top_assoc.txt", col_types = "cccicciccdiddddddd") |>
+egenes <- read_tsv(str_glue("{outdir}/eqtl/top_assoc.txt"), col_types = "cccicciccdiddddddd") |>
     filter(qval < 0.05) |>
     count(tissue, name = "eGeneCount")
 
-d <- tribble(
-    ~tissueSiteDetailId, ~tissueSiteDetail,        ~tissueSite, ~colorHex, ~colorRgb,
-    "Eye",               "Eye",                    "Eye",       "6b4114",  "107,65,20",
-    "IL",                "Infralimbic cortex",     "Brain",     "377eb8",  "55,126,184",
-    "LHb",               "Lateral habenula",       "Brain",     "4daf4a",  "77,175,74",
-    "NAcc",              "Nucleus accumbens core", "Brain",     "e41a1c",  "228,26,28",
-    "OFC",               "Orbitofrontal cortex",   "Brain",     "ff7f00",  "255,127,0",
-    "PL",                "Prelimbic cortex",       "Brain",     "984ea3",  "152,78,163",
-) |>
+d <- read_tsv(str_glue("{indir}/tissue_info.txt"), col_types = "ccccc")
+stopifnot(all(tissues %in% d$tissueSiteDetailId))
+d <- d |>
+    filter(tissueSiteDetailId %in% tissues) |>
     mutate(tissueSiteDetailAbbr = tissueSiteDetailId, .after = tissueSiteDetailId) |>
     left_join(expr, by = "tissueSiteDetailId") |>
     mutate(rnaSeqAndGenotypeSampleCount = rnaSeqSampleCount, .after = rnaSeqSampleCount) |>

@@ -1,22 +1,19 @@
-# library(RSQLite)
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse))
 
-for (tissue in c("Eye", "IL", "LHb", "NAcc", "OFC", "PL")) {
-    cat(tissue, "\n", sep = "")
-    d <- read_tsv(
-        # str_glue("data/tensorqtl/all_cis_pvals/{str_sub(tissue, 1, 1)}QCT.all_cis_pvals.txt.gz"),
-        str_glue("data/tensorqtl/{tissue}.cis_qtl_all_pvals.txt.gz"),
-        col_types = "ccd"
-    ) %>%
-        rename(gene_id = phenotype_id)
-    # con <- dbConnect(SQLite(), dbname = str_glue("~/code/portal_data/cis_pvals/{tissue}.db"))
-    # dbWriteTable(con, "pvals", d)
-    # dbDisconnect(con)
-    d <- split(d, ~ gene_id)
-    for (gene in names(d)) {
-        d[[gene]] %>%
-            select(-gene_id) %>%
-            write_tsv(str_glue("~/code/portal_data/cis_pvals/{tissue}/{gene}.txt"))
-    }
-    rm(d); gc()
+args <- commandArgs(trailingOnly = TRUE)
+indir <- args[1]
+outdir <- args[2]
+tissue <- args[3]
+
+d <- read_tsv(
+    str_glue("{indir}/{tissue}/{tissue}.cis_qtl_all_pvals.txt.gz"),
+    col_types = "ccd"
+)
+d <- split(d, ~ phenotype_id)
+for (gene in names(d)) {
+    print(gene)
+    print(d[[gene]])
+    d[[gene]] |>
+        select(-phenotype_id) |>
+        write_tsv(str_glue("{outdir}/cis_pvals/{tissue}/{gene}.txt"))
 }
