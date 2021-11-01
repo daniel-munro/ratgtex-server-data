@@ -11,8 +11,6 @@ d <- read_tsv(
 )
 d <- split(d, ~ phenotype_id)
 for (gene in names(d)) {
-    print(gene)
-    print(d[[gene]])
     d[[gene]] |>
         select(-phenotype_id) |>
         write_tsv(str_glue("{outdir}/cis_pvals/{tissue}/{gene}.txt"))

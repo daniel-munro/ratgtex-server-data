@@ -1,7 +1,12 @@
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse))
+
+args <- commandArgs(trailingOnly = TRUE)
+indir <- args[1]
+outdir <- args[2]
+tissues <- args[3:length(args)]
 
 # I downloaded GSE173141_series_matrix.txt.gz and edited it to make it readable.
-geo <- read_tsv("data/samples/GSE173141_series_matrix.txt.gz", comment = "!", 
+geo <- read_tsv(str_glue("{indir}/samples/GSE173141_series_matrix.txt.gz"), comment = "!", 
                 col_types = cols(.default = "c")) |>
     rename(field = `Sample_title`) |>
     pivot_longer(-field, names_to = "sample_id") |>
@@ -32,10 +37,10 @@ geo2 <- geo |>
 geo_rats <- geo |>
     distinct(rat_id, sex, rat_batch)
 
-samples <- tibble(tissue = c("Eye", "IL", "LHb", "NAcc", "OFC", "PL")) |>
+samples <- tibble(tissue = tissues) |>
     group_by(tissue) |>
     summarise(
-        tibble(rat_id = read_lines(str_glue("data/{tissue}/rat_ids.txt"))),
+        tibble(rat_id = read_lines(str_glue("{indir}/{tissue}/rat_ids.txt"))),
         .groups = "drop"
     ) |>
     left_join(geo2, by = c("tissue", "rat_id"))
@@ -45,9 +50,9 @@ rats <- samples |>
     summarise(tissues = str_c(tissue, collapse = ", ")) |>
     left_join(geo_rats, by = "rat_id")
 
-write_tsv(samples, "server_data/ref/RatGTEx_samples.tsv")
+write_tsv(samples, str_glue("{outdir}/ref/RatGTEx_samples.tsv"))
 
-write_tsv(rats, "server_data/ref/RatGTEx_rats.tsv")
+write_tsv(rats, str_glue("{outdir}/ref/RatGTEx_rats.tsv"))
 
 ###################
 ## Write to HTML ##
@@ -75,7 +80,7 @@ for (r in 1:nrow(samples)) {
 }
 html_sam <- html_sam |> str_c('</tbody></table>\n')
 
-write_file(html_sam, "data/samples/samples.html")
+write_file(html_sam, str_glue("{outdir}/ref/samples.html"))
 
 html_rat <- '<table id="rat-table"><thead><tr><th>Rat ID</th><th>Sex</th><th>Tissues</th></tr></thead><tbody>'
 for (r in 1:nrow(rats)) {
@@ -99,4 +104,4 @@ for (r in 1:nrow(rats)) {
 }
 html_rat <- html_rat |> str_c('</tbody></table>\n')
 
-write_file(html_rat, "data/samples/rats.html")
+write_file(html_rat, str_glue("{outdir}/ref/rats.html"))

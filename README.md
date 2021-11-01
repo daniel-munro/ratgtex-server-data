@@ -1,9 +1,11 @@
 # ratgtex-server-data
 Process RatGTEx pipeline results into data files for the RatGTEx site
 
-**Under Construction**
-
 ## Requirements
+
+- pandas (Python)
+- gtfparse (Python)
+- tidyverse (R)
 
 ## Usage
 
