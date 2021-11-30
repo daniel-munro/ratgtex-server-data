@@ -41,10 +41,24 @@ expr <- tibble(tissue = tissues) |>
             summarise(expressed = sum(tpm > 0) > 1, # Genes tested for eQTLs
                       .groups = "drop"),
         .groups = "drop"
-    ) |>
+    )
+expr_all <- expr |>
     filter(expressed) |>
     distinct(gene_id) |>
     pull()
+is_expr <- expr |>
+    mutate(expressed = if_else(expressed, "True", "False")) |>
+    pivot_wider(gene_id, names_from = tissue, names_prefix = "expr_",
+                values_from = expressed, values_fill = "False")
+
+has_eqtl <- read_tsv(str_glue("{outdir}/eqtl/eqtls_indep.txt"),
+                 col_types = "cc---------------") |>
+    filter(tissue %in% tissues) |>
+    distinct(tissue, gene_id) |>
+    mutate(eqtl = "True") |>
+    complete(tissue, gene_id = expr$gene_id, fill = list(eqtl = "False")) |>
+    pivot_wider(gene_id, names_from = tissue, names_prefix = "eqtl_",
+                values_from = eqtl)
 
 genes <- read_tsv(str_glue("{indir}/ref/Rattus_norvegicus.Rnor_6.0.99.genes.bed"),
                   col_types = "ciic-c---c",
@@ -53,14 +67,16 @@ genes <- read_tsv(str_glue("{indir}/ref/Rattus_norvegicus.Rnor_6.0.99.genes.bed"
            tss = if_else(strand == "+", start, end)) %>%
     select(geneId, geneSymbol, chromosome, start, end, strand, tss) |>
     left_join(descs, by = "geneId") |>
+    replace_na(list(description = "")) |>
     mutate(hasEqtl = if_else(geneId %in% signif, "True", "False")) |>
-    replace_na(list(description = ""))
+    left_join(is_expr, by = c("geneId" = "gene_id")) |>
+    left_join(has_eqtl, by = c("geneId" = "gene_id"))
 
 write_tsv(genes, str_glue("{outdir}/gene.txt"))
 
 # Save list of all (expressed) names and IDs for search autocomplete:
 genes2 <- genes |>
-    filter(geneId %in% expr)
+    filter(geneId %in% expr_all)
 c(genes2$geneId, genes2$geneSymbol) |>
     unique() |>
     sort() |>
