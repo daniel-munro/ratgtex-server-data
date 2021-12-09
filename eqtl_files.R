@@ -28,7 +28,12 @@ indir <- args[1]
 outdir <- args[2]
 tissues <- args[3:length(args)]
 
-genes <- read_tsv(str_glue("{indir}/genes.txt"), col_types = "cc---ci-----")
+genes <- read_tsv(str_glue("{indir}/ref/Rattus_norvegicus.Rnor_6.0.99.genes.bed"),
+                  col_types = "-iic-c---c",
+                  col_names = c("start", "end", "gene_id", "strand", "etc")) |>
+    mutate(gene_name = str_match(etc, 'gene_name "([^"]+)"')[, 2],
+           tss = if_else(strand == "+", start, end)) |>
+    select(gene_id, gene_name, strand, tss)
 
 alleles <- read_tsv(str_glue("{indir}/alleles.txt.gz"), col_types = "ccc",
                     col_names = c("variant_id", "ref", "alt"))

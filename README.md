@@ -5,13 +5,12 @@ Once the [RatGTEx pipeline](https://github.com/daniel-munro/ratgtex-pipeline) is
 
 ## Inputs (in specified input directory):
 
-- `alleles.txt.gz`
-- `genes.txt`
-- `tissue_info.txt`
-- `ref/GENES_RAT.txt`
+- `geno/alleles.txt.gz`: Three-column tab-delimited file with variant ID, REF, and ALT alleles extracted from `geno/ratgtex.vcf.gz`.
+- `tissue_info.txt`: Tab-delimited table of basic information about each tissue, e.g. full name and color to use in website visualizations.
+- `ref/GENES_RAT.txt`: Gene information downloaded from the Rat Genome Database. Used to show descriptive gene names.
+- `samples/GSE173141_series_matrix.txt.gz`: Downloaded GEO series metadata for brain regions that has been edited. More files will need to be added as inputs to `sample_table.R` as datasets are added to GEO.
 - `ref/Rattus_norvegicus.Rnor_6.0.99.genes.bed`
 - `ref/Rattus_norvegicus.Rnor_6.0.99.genes.gtf`
-- `samples/GSE173141_series_matrix.txt.gz`: Downloaded GEO series metadata for brain regions that has been edited. More files will need to be added as inputs to `sample_table.R` as datasets are added to GEO.
 - `{tissue}/rat_ids.txt`
 - `{tissue}/{tissue}.aFC.txt`
 - `{tissue}/{tissue}.cis_independent_qtl.txt.gz`
