@@ -35,7 +35,7 @@ genes <- read_tsv(str_glue("{indir}/ref/Rattus_norvegicus.Rnor_6.0.99.genes.bed"
            tss = if_else(strand == "+", start, end)) |>
     select(gene_id, gene_name, strand, tss)
 
-alleles <- read_tsv(str_glue("{indir}/alleles.txt.gz"), col_types = "ccc",
+alleles <- read_tsv(str_glue("{indir}/geno/alleles.txt.gz"), col_types = "ccc",
                     col_names = c("variant_id", "ref", "alt"))
 
 afc <- tibble(tissue = tissues) |>
