@@ -21,8 +21,10 @@ parser.add_argument(
 args = parser.parse_args()
 
 args.outdir.mkdir(exist_ok=True)
-(args.outdir / "eqtl").mkdir(exist_ok=True)
 (args.outdir / "cis_pvals").mkdir(exist_ok=True)
+(args.outdir / "covar").mkdir(exist_ok=True)
+(args.outdir / "eqtl").mkdir(exist_ok=True)
+(args.outdir / "expr").mkdir(exist_ok=True)
 (args.outdir / "ref").mkdir(exist_ok=True)
 
 files = ["top_assoc.txt", "eqtls_indep.txt"]
@@ -98,3 +100,26 @@ if not (args.keep_existing and all([file.exists() for file in files])):
         ["Rscript", script, str(args.indir), str(args.outdir), *args.tissues],
         check=True,
     )
+
+## Copy existing expression files
+infiles = []
+outfiles = []
+for tissue in args.tissues:
+    for units in {"iqn", "log2", "tpm"}:
+        infiles.append(args.indir / tissue / f"{tissue}.expr.{units}.bed.gz")
+        outfiles.append(args.outdir / "expr" / f"{tissue}.expr.{units}.bed.gz")
+if not (args.keep_existing and all([file.exists() for file in outfiles])):
+    print("Copying expression files")
+    for infile in infiles:
+        subprocess.run(["cp", str(infile), args.outdir / "expr"], check=True)
+
+## Copy existing covariate files
+outfiles = []
+for tissue in args.tissues:
+    outfiles.append(args.outdir / "covar" / f"{tissue}.covar.txt")
+if not (args.keep_existing and all([file.exists() for file in outfiles])):
+    print("Copying covariate files")
+    for tissue in args.tissues:
+        infile = args.indir / tissue / "covar.txt"
+        outfile = args.outdir / "covar" / f"{tissue}.covar.txt"
+        subprocess.run(["cp", str(infile), str(outfile)], check=True)
