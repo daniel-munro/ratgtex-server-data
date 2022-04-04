@@ -51,8 +51,15 @@ is_expr <- expr |>
     pivot_wider(gene_id, names_from = tissue, names_prefix = "expr_",
                 values_from = expressed, values_fill = "False")
 
+was_tested <- read_tsv(str_glue("{outdir}/eqtl/top_assoc.txt"),
+                   col_types = "cc----------------") |>
+    mutate(tested = "True") |>
+    complete(tissue, gene_id = expr$gene_id, fill = list(tested = "False")) |>
+    pivot_wider(gene_id, names_from = tissue, names_prefix = "tested_",
+                values_from = tested)
+
 has_eqtl <- read_tsv(str_glue("{outdir}/eqtl/eqtls_indep.txt"),
-                 col_types = "cc---------------") |>
+                     col_types = "cc---------------") |>
     filter(tissue %in% tissues) |>
     distinct(tissue, gene_id) |>
     mutate(eqtl = "True") |>
@@ -70,6 +77,7 @@ genes <- read_tsv(str_glue("{indir}/ref/Rattus_norvegicus.Rnor_6.0.99.genes.bed"
     replace_na(list(description = "")) |>
     mutate(hasEqtl = if_else(geneId %in% signif, "True", "False")) |>
     left_join(is_expr, by = c("geneId" = "gene_id")) |>
+    left_join(was_tested, by = c("geneId" = "gene_id")) |>
     left_join(has_eqtl, by = c("geneId" = "gene_id"))
 
 write_tsv(genes, str_glue("{outdir}/gene.txt"))
