@@ -24,7 +24,7 @@ egenes <- read_tsv(str_glue("{outdir}/eqtl/top_assoc.txt"), col_types = "cccicci
     filter(qval < 0.05) |>
     count(tissue, name = "eGeneCount")
 
-d <- read_tsv(str_glue("{indir}/tissue_info.txt"), col_types = "ccccc")
+d <- read_tsv(str_glue("{indir}/tissue_info.txt"), col_types = "cccccc")
 stopifnot(all(tissues %in% d$tissueSiteDetailId))
 d <- d |>
     filter(tissueSiteDetailId %in% tissues) |>

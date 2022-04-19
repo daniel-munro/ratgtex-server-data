@@ -33,8 +33,8 @@ Once the [RatGTEx pipeline](https://github.com/daniel-munro/ratgtex-pipeline) is
 - `medianGeneExpression.txt.gz`
 - `ref/RatGTEx_rats.tsv`
 - `ref/RatGTEx_samples.tsv`
-- `ref/rats.html`: This HTML table must be copied into /about/samples/index.html
-- `ref/samples.html`: This HTML table must be copied into /about/samples/index.html
+- `ref/rats.html`: This HTML table must be copied into `/about/samples/index.html`
+- `ref/samples.html`: This HTML table must be copied into `/about/samples/index.html`
 - `singleTissueEqtl.zip`
 - `tissueInfo.txt`
 - `topExpressedGene.txt`
@@ -52,3 +52,10 @@ Run `run.py`, which calls R and Python scripts that prepare the server data. The
 1. Path to the RatGTEx pipeline base directory
 2. Output directory path
 3. The remaining parameters are the list of tissues to include
+
+Then, do these additional steps:
+
+1. Copy genotype files ({tissues}.vcf.gz and {tissues}.vcf.gz.tbi) for each study dataset from the input into `{outdir}/geno/`.
+2. Run `check.py` to check if all necessary files have been created/copied.
+3. Copy `ref/rats.html` and `ref/samples.html` into `/about/samples/index.html` in the site directory.
+4. `{outdir}/studies/{tissues}/` contain data directly used in the original publications, which may or may not differ from the data from the unified RatGTEx pipeline. These aren't used in the portal except to be available for download. Copy any files to this location and link to them on the original study data section on the downloads page.
