@@ -1,41 +1,71 @@
 suppressPackageStartupMessages(library(tidyverse))
 
+field_values <- function(lines, field_name, keyword = NULL) {
+    # Some field names are not unique, so a keyword can be supplied that must
+    # be present anywhere in the line, e.g. "BioSample" or "SRA"
+    if (!is.null(keyword)) {
+        lines <- str_subset(lines, keyword)
+    }
+    lines |>
+        str_subset(str_glue("^!{field_name}\\t")) |>
+        str_replace(str_glue("^!{field_name}\\t"), "") |>
+        str_replace_all('"', '') |>
+        str_split(pattern = "\\t", simplify = TRUE) |>
+        c()
+}
+
+load_geo <- function(filename, trim_ids = FALSE) {
+    lines <- read_lines(filename)
+    geo <- tibble(
+        rat_id = field_values(lines, "Sample_title"),
+        GEO_accession = field_values(lines, "Sample_geo_accession"),
+        BioSample_accession = field_values(lines, "Sample_relation", "BioSample"),
+        SRA_accession = field_values(lines, "Sample_relation", "SRA"),
+    ) |>
+        mutate(
+            BioSample_accession = str_replace(
+                BioSample_accession,
+                "BioSample: https://www.ncbi.nlm.nih.gov/biosample/",
+                ""
+            ),
+            SRA_accession = str_replace(
+                SRA_accession,
+                fixed("SRA: https://www.ncbi.nlm.nih.gov/sra?term="),
+                ""
+            ),
+        )
+    if (trim_ids) { # Remove tissue name from IDs in older submissions
+        geo <- geo |>
+            mutate(rat_id = str_replace(rat_id, "_.+$", ""))
+    }
+    geo
+}
+
 args <- commandArgs(trailingOnly = TRUE)
 indir <- args[1]
 outdir <- args[2]
 tissues <- args[3:length(args)]
 
-# I downloaded GSE173141_series_matrix.txt.gz and edited it to make it readable.
-geo <- read_tsv(str_glue("{indir}/samples/GSE173141_series_matrix.txt.gz"), comment = "!", 
-                col_types = cols(.default = "c")) |>
-    rename(field = `Sample_title`) |>
-    pivot_longer(-field, names_to = "sample_id") |>
-    pivot_wider(sample_id, names_from = field, values_from = value) |>
-    separate(sample_id, c("rat_id", "tissue")) |>
-    mutate(tissue = c(IL = "IL", LHB = "LHb", Acbc = "NAcc", VoLo = "OFC", PL = "PL")[tissue],
-           BioSample = str_replace(
-               BioSample,
-               "BioSample: https://www.ncbi.nlm.nih.gov/biosample/",
-               ""
-           ),
-           SRA = str_replace(
-               SRA,
-               fixed("SRA: https://www.ncbi.nlm.nih.gov/sra?term="),
-               ""
-           ),
-           sex = str_replace(sex, "Sex: ", ""),
-           rat_batch = str_replace(rat_batch, "rat batch: ", "")
+accession <- c(
+    Eye = "GSE201236",
+    IL = "GSE173137",
+    LHb = "GSE173138",
+    NAcc = "GSE173136",
+    OFC = "GSE173140",
+    PL = "GSE173139"
+)
+to_trim <- c("IL", "LHb", "NAcc", "OFC", "PL") # IDs have tissue appended to rat ID
+
+geo <- tibble(tissue = tissues) |>
+    filter(tissue %in% names(accession)) |>
+    group_by(tissue) |>
+    summarise(
+        load_geo(
+            str_glue("{indir}/samples/{accession[tissue]}_series_matrix.txt.gz"),
+            tissue %in% to_trim
+        ),
+        .groups = "drop"
     )
-
-geo2 <- geo |>
-    select(tissue,
-           rat_id,
-           GEO_accession = Sample_geo_accession,
-           BioSample_accession = BioSample,
-           SRA_accession = SRA)
-
-geo_rats <- geo |>
-    distinct(rat_id, sex, rat_batch)
 
 samples <- tibble(tissue = tissues) |>
     group_by(tissue) |>
@@ -43,12 +73,11 @@ samples <- tibble(tissue = tissues) |>
         tibble(rat_id = read_lines(str_glue("{indir}/{tissue}/rat_ids.txt"))),
         .groups = "drop"
     ) |>
-    left_join(geo2, by = c("tissue", "rat_id"))
+    left_join(geo, by = c("tissue", "rat_id"))
 
 rats <- samples |>
     group_by(rat_id) |>
-    summarise(tissues = str_c(tissue, collapse = ", ")) |>
-    left_join(geo_rats, by = "rat_id")
+    summarise(tissues = str_c(tissue, collapse = ", "))
 
 write_tsv(samples, str_glue("{outdir}/ref/RatGTEx_samples.tsv"))
 
@@ -82,15 +111,15 @@ html_sam <- html_sam |> str_c('</tbody></table>\n')
 
 write_file(html_sam, str_glue("{outdir}/ref/samples.html"))
 
-html_rat <- '<table id="rat-table"><thead><tr><th>Rat ID</th><th>Sex</th><th>Tissues</th></tr></thead><tbody>'
+html_rat <- '<table id="rat-table"><thead><tr><th>Rat ID</th><th>Tissues</th></tr></thead><tbody>'
 for (r in 1:nrow(rats)) {
     id <- rats$rat_id[r]
     html_rat <- html_rat |> str_c(str_glue('<tr><td>{id}</td>'))
-    html_rat <- html_rat |> str_c(if (is.na(rats$sex[r])) {
-        '<td>-</td>'
-    } else {
-        str_glue('<td>{rats$sex[r]}</td>')
-    })
+    # html_rat <- html_rat |> str_c(if (is.na(rats$sex[r])) {
+    #     '<td>-</td>'
+    # } else {
+    #     str_glue('<td>{rats$sex[r]}</td>')
+    # })
     tissue_text <- c()
     for (tis in str_split(rats$tissues[r], ", ")[[1]]) {
         sam <- filter(samples, tissue == tis, rat_id == id)
