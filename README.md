@@ -11,12 +11,16 @@ Once the [RatGTEx pipeline](https://github.com/daniel-munro/ratgtex-pipeline) is
 - `samples/{accession}_series_matrix.txt.gz`: GEO series metadata for each tissue whose RNA-Seq data has been added to GEO. When a tissue is added to GEO, download this file for the series (not the superseries in case of multitissue datasets) and add the accession to `sample_table.R`.
 - `ref/Rattus_norvegicus.Rnor_6.0.99.genes.bed`
 - `ref/Rattus_norvegicus.Rnor_6.0.99.genes.gtf`
+- `{tissue}/covar.txt`
+- `{tissue}/fastq_map.txt`
 - `{tissue}/rat_ids.txt`
 - `{tissue}/{tissue}.aFC.txt`
 - `{tissue}/{tissue}.cis_independent_qtl.txt.gz`
 - `{tissue}/{tissue}.cis_qtl_all_pvals.txt.gz`
 - `{tissue}/{tissue}.cis_qtl_signif.txt.gz`
 - `{tissue}/{tissue}.cis_qtl.txt.gz`
+- `{tissue}/{tissue}.expr.iqn.bed.gz`
+- `{tissue}/{tissue}.expr.log2.bed.gz`
 - `{tissue}/{tissue}.expr.tpm.bed.gz`
 - `{tissue}/{tissue}.trans_qtl_pairs.txt.gz`
 
@@ -24,13 +28,17 @@ Once the [RatGTEx pipeline](https://github.com/daniel-munro/ratgtex-pipeline) is
 
 - `autocomplete.json`
 - `cis_pvals/{tissue}.zip`
+- `covar/{tissue}.covar.txt`
 - `eqtl/eqtls_indep.txt`
 - `eqtl/top_assoc.txt`
 - `eqtl/{tissue}.cis_qtl_signif.txt.gz`
 - `eqtl/{tissue}.trans_qtl_pairs.txt.gz`
 - `exon.txt`
+- `expr/{tissue}.expr.{iqn,log2,tpm}.bed.gz`
+- `fastq_map/{tissue}.fastq_map.txt`
 - `gene.txt`
 - `medianGeneExpression.txt.gz`
+- `rat_ids/{tissue}.rat_ids.txt`
 - `ref/RatGTEx_rats.tsv`
 - `ref/RatGTEx_samples.tsv`
 - `ref/rats.html`: This HTML table must be copied into `/about/samples/index.html`

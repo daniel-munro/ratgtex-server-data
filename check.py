@@ -39,9 +39,11 @@ for tissue in tissues:
     for units in ["iqn", "log2", "tpm"]:
         files.append(args.outdir / "expr" / f"{tissue}.expr.{units}.bed.gz")
 
-## Covariate files
+## Covariate, fastq_map, and rat_ids files
 for tissue in tissues:
     files.append(args.outdir / "covar" / f"{tissue}.covar.txt")
+    files.append(args.outdir / "fastq_map" / f"{tissue}.fastq_map.txt")
+    files.append(args.outdir / "rat_ids" / f"{tissue}.rat_ids.txt")
 
 ## Genotype files
 geno = []

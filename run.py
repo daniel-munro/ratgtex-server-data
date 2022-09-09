@@ -25,6 +25,8 @@ args.outdir.mkdir(exist_ok=True)
 (args.outdir / "covar").mkdir(exist_ok=True)
 (args.outdir / "eqtl").mkdir(exist_ok=True)
 (args.outdir / "expr").mkdir(exist_ok=True)
+(args.outdir / "fastq_map").mkdir(exist_ok=True)
+(args.outdir / "rat_ids").mkdir(exist_ok=True)
 (args.outdir / "ref").mkdir(exist_ok=True)
 
 files = ["top_assoc.txt", "eqtls_indep.txt"]
@@ -113,13 +115,16 @@ if not (args.keep_existing and all([file.exists() for file in outfiles])):
     for infile in infiles:
         subprocess.run(["cp", str(infile), args.outdir / "expr"], check=True)
 
-## Copy existing covariate files
+## Copy existing covariate, fastq_map, and rat_ids files
 outfiles = []
 for tissue in args.tissues:
     outfiles.append(args.outdir / "covar" / f"{tissue}.covar.txt")
+    outfiles.append(args.outdir / "fastq_map" / f"{tissue}.fastq_map.txt")
+    outfiles.append(args.outdir / "rat_ids" / f"{tissue}.rat_ids.txt")
 if not (args.keep_existing and all([file.exists() for file in outfiles])):
-    print("Copying covariate files")
+    print("Copying covariate, fastq_map, and rat_ids files")
     for tissue in args.tissues:
-        infile = args.indir / tissue / "covar.txt"
-        outfile = args.outdir / "covar" / f"{tissue}.covar.txt"
-        subprocess.run(["cp", str(infile), str(outfile)], check=True)
+        for ftype in ['covar', 'fastq_map', 'rat_ids']:
+            infile = args.indir / tissue / f"{ftype}.txt"
+            outfile = args.outdir / ftype / f"{tissue}.{ftype}.txt"
+            subprocess.run(["cp", str(infile), str(outfile)], check=True)
