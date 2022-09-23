@@ -15,13 +15,13 @@ tissues = list(tissue_info["tissueSiteDetailId"])
 
 files = []
 
-# Gene files
+## Gene files
 gene = ["gene.txt", "autocomplete.json"]
 gene += ["medianGeneExpression.txt.gz", "topExpressedGene.txt"]
 gene += ["exon.txt"]
 files += [args.outdir / x for x in gene]
 
-# eQTL files
+## eQTL files
 eqtl = ["top_assoc.txt", "eqtls_indep.txt"]
 eqtl += [f"{tissue}.cis_qtl_signif.txt.gz" for tissue in tissues]
 eqtl += [f"{tissue}.trans_qtl_pairs.txt.gz" for tissue in tissues]
@@ -30,7 +30,7 @@ files += [args.outdir / "eqtl" / x for x in eqtl]
 files += [args.outdir / "singleTissueEqtl.zip"]
 files += [args.outdir / "cis_pvals" / f"{tissue}.zip" for tissue in tissues]
 
-# Sample and rat tables
+## Sample and rat tables
 ref = ["RatGTEx_rats.tsv", "RatGTEx_samples.tsv"]
 files += [args.outdir / "ref" / x for x in ref]
 
@@ -50,6 +50,13 @@ geno = []
 for dset in tissue_info["dataset"].unique():
     geno += [f"{dset}.vcf.gz", f"{dset}.vcf.gz.tbi"]
 files += [args.outdir / "geno" / x for x in geno]
+
+## Splice phenotypes, covariates, and sQTL files
+splice = ["top_assoc_splice.txt", "sqtls_indep.txt"]
+splice += [f"{tissue}.leafcutter.bed.gz" for tissue in tissues]
+splice += [f"{tissue}.covar_splice.txt" for tissue in tissues]
+splice += [f"{tissue}_splice.trans_qtl_pairs.txt.gz" for tissue in tissues]
+files += [args.outdir / "splice" / x for x in splice]
 
 any_missing = False
 for file in files:

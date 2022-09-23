@@ -28,6 +28,7 @@ args.outdir.mkdir(exist_ok=True)
 (args.outdir / "fastq_map").mkdir(exist_ok=True)
 (args.outdir / "rat_ids").mkdir(exist_ok=True)
 (args.outdir / "ref").mkdir(exist_ok=True)
+(args.outdir / "splice").mkdir(exist_ok=True)
 
 files = ["top_assoc.txt", "eqtls_indep.txt"]
 files += [f"{tissue}.cis_qtl_signif.txt.gz" for tissue in args.tissues]
@@ -127,4 +128,25 @@ if not (args.keep_existing and all([file.exists() for file in outfiles])):
         for ftype in ['covar', 'fastq_map', 'rat_ids']:
             infile = args.indir / tissue / f"{ftype}.txt"
             outfile = args.outdir / ftype / f"{tissue}.{ftype}.txt"
+            subprocess.run(["cp", str(infile), str(outfile)], check=True)
+
+## Splice files
+files = ["top_assoc_splice.txt", "sqtls_indep.txt"]
+files += [f"{tissue}_splice.trans_qtl_pairs.txt.gz" for tissue in args.tissues]
+files = [args.outdir / "splice" / x for x in files]
+if not (args.keep_existing and all([file.exists() for file in files])):
+    print("Assembling sQTL files")
+    script = Path(__file__).parent / "sqtl_files.R"
+    subprocess.run(
+        ["Rscript", script, str(args.indir), str(args.outdir), *args.tissues],
+        check=True,
+    )
+outfiles = [args.outdir / "splice" / f"{tissue}.leafcutter.bed.gz" for tissue in args.tissues]
+outfiles += [args.outdir / "splice" / f"{tissue}.covar_splice.txt" for tissue in args.tissues]
+if not (args.keep_existing and all([file.exists() for file in outfiles])):
+    print("Copying splicing phenotype and covariate files")
+    for tissue in args.tissues:
+        for fname in [f"{tissue}.leafcutter.bed.gz", f"{tissue}.covar_splice.txt"]:
+            infile = args.indir / tissue / "splice" / fname
+            outfile = args.outdir / "splice" / fname
             subprocess.run(["cp", str(infile), str(outfile)], check=True)
