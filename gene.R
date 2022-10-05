@@ -30,6 +30,8 @@ signif <- tibble(tissue = tissues) |>
     distinct(phenotype_id) |>
     pull()
 
+## Add expression/eQTL status for gene page
+
 expr <- tibble(tissue = tissues) |>
     group_by(tissue) |>
     summarise(
@@ -38,7 +40,7 @@ expr <- tibble(tissue = tissues) |>
                                gene_id = "c", .default = "d")) |>
             pivot_longer(-gene_id, names_to = "rat_id", values_to = "tpm") |>
             group_by(gene_id) |>
-            summarise(expressed = sum(tpm > 0) > 1, # Genes tested for eQTLs
+            summarise(expressed = sum(tpm > 0) > 1,
                       .groups = "drop"),
         .groups = "drop"
     )
@@ -51,12 +53,12 @@ is_expr <- expr |>
     pivot_wider(gene_id, names_from = tissue, names_prefix = "expr_",
                 values_from = expressed, values_fill = "False")
 
-was_tested <- read_tsv(str_glue("{outdir}/eqtl/top_assoc.txt"),
+was_tested_eqtl <- read_tsv(str_glue("{outdir}/eqtl/top_assoc.txt"),
                    col_types = "cc----------------") |>
-    mutate(tested = "True") |>
-    complete(tissue, gene_id = expr$gene_id, fill = list(tested = "False")) |>
-    pivot_wider(gene_id, names_from = tissue, names_prefix = "tested_",
-                values_from = tested)
+    mutate(testedEqtl = "True") |>
+    complete(tissue, gene_id = expr$gene_id, fill = list(testedEqtl = "False")) |>
+    pivot_wider(gene_id, names_from = tissue, names_prefix = "testedEqtl_",
+                values_from = testedEqtl)
 
 has_eqtl <- read_tsv(str_glue("{outdir}/eqtl/eqtls_indep.txt"),
                      col_types = "cc---------------") |>
@@ -66,6 +68,41 @@ has_eqtl <- read_tsv(str_glue("{outdir}/eqtl/eqtls_indep.txt"),
     complete(tissue, gene_id = expr$gene_id, fill = list(eqtl = "False")) |>
     pivot_wider(gene_id, names_from = tissue, names_prefix = "eqtl_",
                 values_from = eqtl)
+
+## Add alt splicing/sQTL status for gene page
+
+splice <- tibble(tissue = tissues) |>
+    group_by(tissue) |>
+    summarise(
+        read_tsv(str_glue("{indir}/{tissue}/splice/{tissue}.leafcutter.phenotype_groups.txt"),
+                 skip = 1, col_names = c("phenotype_id", "gene_id"), col_types = "-c"),
+        .groups = "drop"
+    ) |>
+    distinct(tissue, gene_id)
+is_alt_spliced <- splice |>
+    mutate(altSpliced = "True") |>
+    complete(tissue, gene_id = expr$gene_id, fill = list(altSpliced = "False")) |>
+    pivot_wider(gene_id, names_from = tissue, names_prefix = "altSplice_",
+                values_from = altSpliced)
+
+was_tested_sqtl <- read_tsv(str_glue("{outdir}/splice/top_assoc_splice.txt"),
+                   col_types = "c-------------c----") |>
+    distinct(tissue, gene_id) |>
+    mutate(testedSqtl = "True") |>
+    complete(tissue, gene_id = expr$gene_id, fill = list(testedSqtl = "False")) |>
+    pivot_wider(gene_id, names_from = tissue, names_prefix = "testedSqtl_",
+                values_from = testedSqtl)
+
+has_sqtl <- read_tsv(str_glue("{outdir}/splice/sqtls_indep.txt"),
+                     col_types = "c-------------c---") |>
+    filter(tissue %in% tissues) |>
+    distinct(tissue, gene_id) |>
+    mutate(sqtl = "True") |>
+    complete(tissue, gene_id = expr$gene_id, fill = list(sqtl = "False")) |>
+    pivot_wider(gene_id, names_from = tissue, names_prefix = "sqtl_",
+                values_from = sqtl)
+
+## Assemble
 
 genes <- read_tsv(str_glue("{indir}/ref/Rattus_norvegicus.Rnor_6.0.99.genes.bed"),
                   col_types = "ciic-c---c",
@@ -77,8 +114,11 @@ genes <- read_tsv(str_glue("{indir}/ref/Rattus_norvegicus.Rnor_6.0.99.genes.bed"
     replace_na(list(description = "")) |>
     mutate(hasEqtl = if_else(geneId %in% signif, "True", "False")) |>
     left_join(is_expr, by = c("geneId" = "gene_id")) |>
-    left_join(was_tested, by = c("geneId" = "gene_id")) |>
-    left_join(has_eqtl, by = c("geneId" = "gene_id"))
+    left_join(was_tested_eqtl, by = c("geneId" = "gene_id")) |>
+    left_join(has_eqtl, by = c("geneId" = "gene_id")) |>
+    left_join(is_alt_spliced, by = c("geneId" = "gene_id")) |>
+    left_join(was_tested_sqtl, by = c("geneId" = "gene_id")) |>
+    left_join(has_sqtl, by = c("geneId" = "gene_id"))
 
 write_tsv(genes, str_glue("{outdir}/gene.txt"))
 
