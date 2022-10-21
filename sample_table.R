@@ -45,6 +45,7 @@ args <- commandArgs(trailingOnly = TRUE)
 indir <- args[1]
 outdir <- args[2]
 tissues <- args[3:length(args)]
+# tissues <- c("Adipose", "BLA", "Brain", "Eye", "IL", "LHb", "Liver", "NAcc", "NAcc2", "OFC", "PL", "PL2")
 
 accession <- c(
     Eye = "GSE201236",
@@ -79,6 +80,22 @@ rats <- samples |>
     group_by(rat_id) |>
     summarise(tissues = str_c(tissue, collapse = ", "))
 
+meta <- read_csv(
+    str_glue("{indir}/geno/genotyping_log.csv"),
+    col_types = cols(sample_name = "c", sex = "c", coatcolor = "c", .default = "-")
+) |>
+    rename(rat_id = sample_name) |> # In this file, all sample_name are unique and identical to rfid
+    mutate(
+        coatcolor = coatcolor |> # Collapse equivalent labels
+            str_to_upper() |>
+            str_replace("BLK HOOD", "BLACKHOOD") |>
+            str_replace("BRN HOOD", "BROWNHOOD")
+    )
+
+rats <- rats |>
+    left_join(meta, by = "rat_id") |>
+    relocate(tissues, .after = "coatcolor")
+
 write_tsv(samples, str_glue("{outdir}/ref/RatGTEx_samples.tsv"))
 
 write_tsv(rats, str_glue("{outdir}/ref/RatGTEx_rats.tsv"))
@@ -111,15 +128,20 @@ html_sam <- html_sam |> str_c('</tbody></table>\n')
 
 write_file(html_sam, str_glue("{outdir}/ref/samples.html"))
 
-html_rat <- '<table id="rat-table"><thead><tr><th>Rat ID</th><th>Tissues</th></tr></thead><tbody>'
+html_rat <- '<table id="rat-table"><thead><tr><th>Rat ID</th><th>Sex</th><th>Coat Color</th><th>Tissues</th></tr></thead><tbody>'
 for (r in 1:nrow(rats)) {
     id <- rats$rat_id[r]
     html_rat <- html_rat |> str_c(str_glue('<tr><td>{id}</td>'))
-    # html_rat <- html_rat |> str_c(if (is.na(rats$sex[r])) {
-    #     '<td>-</td>'
-    # } else {
-    #     str_glue('<td>{rats$sex[r]}</td>')
-    # })
+    html_rat <- html_rat |> str_c(if (is.na(rats$sex[r])) {
+        '<td>-</td>'
+    } else {
+        str_glue('<td>{rats$sex[r]}</td>')
+    })
+    html_rat <- html_rat |> str_c(if (is.na(rats$coatcolor[r])) {
+        '<td>-</td>'
+    } else {
+        str_glue('<td>{rats$coatcolor[r]}</td>')
+    })
     tissue_text <- c()
     for (tis in str_split(rats$tissues[r], ", ")[[1]]) {
         sam <- filter(samples, tissue == tis, rat_id == id)
