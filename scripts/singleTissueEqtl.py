@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "indir", type=Path, help="Path to the RatGTEx pipeline base directory"
 )
+parser.add_argument("version", type=str, help="rn6 or rn7")
 parser.add_argument("outdir", type=Path, help="Output directory path")
 parser.add_argument("tissues", nargs="+", type=str, help="Tissues to include")
 args = parser.parse_args()
@@ -18,7 +19,7 @@ args = parser.parse_args()
 sig = []
 for tissue in args.tissues:
     print(tissue)
-    d = pd.read_csv(args.indir / tissue / f"{tissue}.cis_qtl_signif.txt.gz", sep="\t")
+    d = pd.read_csv(args.indir / args.version / tissue / f"{tissue}.cis_qtl_signif.txt.gz", sep="\t")
     d = d[["phenotype_id", "variant_id", "pval_nominal", "slope"]]
     d = d.rename(
         columns={
@@ -36,7 +37,7 @@ for tissue in args.tissues:
 
 sig = pd.concat(sig)
 
-outfile = args.outdir / "singleTissueEqtl.zip"
+outfile = args.outdir / f"{args.version}.singleTissueEqtl.zip"
 with zipfile.ZipFile(outfile, 'w', zipfile.ZIP_DEFLATED) as out:
     for gene, d in sig.groupby("phenotype_id"):
         d = d.drop(columns=["phenotype_id"])
@@ -45,4 +46,4 @@ with zipfile.ZipFile(outfile, 'w', zipfile.ZIP_DEFLATED) as out:
             index=False,
             float_format="%g",
         )
-        out.writestr(f"singleTissueEqtl/{gene}.txt", d_str)
+        out.writestr(f"{args.version}.singleTissueEqtl/{gene}.txt", d_str)

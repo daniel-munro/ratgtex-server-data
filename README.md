@@ -1,7 +1,7 @@
 # ratgtex-server-data
 Process RatGTEx pipeline results into data files for the RatGTEx site
 
-Once the [RatGTEx pipeline](https://github.com/daniel-munro/ratgtex-pipeline) is run for all tissues, this code processes the results and assembles them into data files for [ratgtex.org](https://ratgtex.org). Most of them are put into a convenient format to be used by the [API](github.com/daniel-munro/ratgtex), which is used mainly for the data visualizations.
+Once the [RatGTEx pipeline](https://github.com/daniel-munro/ratgtex-pipeline) is run for all tissues, this code processes the results and assembles them into data files for [ratgtex.org](https://ratgtex.org). Most of them are put into a convenient format to be used by the [API](github.com/daniel-munro/ratgtex), which is used mainly for the data visualizations. This should be run separately for each genome version, and all output file names will contain the version.
 
 ## Inputs (in specified input directory):
 

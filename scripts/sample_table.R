@@ -43,8 +43,9 @@ load_geo <- function(filename, trim_ids = FALSE) {
 
 args <- commandArgs(trailingOnly = TRUE)
 indir <- args[1]
-outdir <- args[2]
-tissues <- args[3:length(args)]
+rn <- args[2]
+outdir <- args[3]
+tissues <- args[4:length(args)]
 # tissues <- c("Adipose", "BLA", "Brain", "Eye", "IL", "LHb", "Liver", "NAcc", "NAcc2", "OFC", "PL", "PL2")
 
 accession <- c(
@@ -71,7 +72,7 @@ geo <- tibble(tissue = tissues) |>
 samples <- tibble(tissue = tissues) |>
     group_by(tissue) |>
     summarise(
-        tibble(rat_id = read_lines(str_glue("{indir}/{tissue}/rat_ids.txt"))),
+        tibble(rat_id = read_lines(str_glue("{indir}/{rn}/{tissue}/rat_ids.txt"))),
         .groups = "drop"
     ) |>
     left_join(geo, by = c("tissue", "rat_id"))
@@ -80,11 +81,15 @@ rats <- samples |>
     group_by(rat_id) |>
     summarise(tissues = str_c(tissue, collapse = ", "))
 
+geno_log <- c(
+    rn6 = "genotyping_log.csv",
+    rn7 = "original/Heterogenous-stock_n15552_02222023_stitch2_QC_Sex_Het_pass_n14505_genotype_log.csv"
+)[rn]
 meta <- read_csv(
-    str_glue("{indir}/geno/genotyping_log.csv"),
-    col_types = cols(sample_name = "c", sex = "c", coatcolor = "c", .default = "-")
+    str_glue("{indir}/geno_{rn}/{geno_log}"),
+    col_types = cols(rfid = "c", sex = "c", coatcolor = "c", .default = "-")
 ) |>
-    rename(rat_id = sample_name) |> # In this file, all sample_name are unique and identical to rfid
+    rename(rat_id = rfid) |> # In this file, all sample_name are unique and identical to rfid
     mutate(
         coatcolor = coatcolor |> # Collapse equivalent labels
             str_to_upper() |>
@@ -96,9 +101,9 @@ rats <- rats |>
     left_join(meta, by = "rat_id") |>
     relocate(tissues, .after = "coatcolor")
 
-write_tsv(samples, str_glue("{outdir}/ref/RatGTEx_samples.tsv"))
+write_tsv(samples, str_glue("{outdir}/ref/{rn}.RatGTEx_samples.tsv"))
 
-write_tsv(rats, str_glue("{outdir}/ref/RatGTEx_rats.tsv"))
+write_tsv(rats, str_glue("{outdir}/ref/{rn}.RatGTEx_rats.tsv"))
 
 ###################
 ## Write to HTML ##
@@ -126,7 +131,7 @@ for (r in 1:nrow(samples)) {
 }
 html_sam <- html_sam |> str_c('</tbody></table>\n')
 
-write_file(html_sam, str_glue("{outdir}/ref/samples.html"))
+write_file(html_sam, str_glue("{outdir}/ref/{rn}.samples.html"))
 
 html_rat <- '<table id="rat-table"><thead><tr><th>Rat ID</th><th>Sex</th><th>Coat Color</th><th>Tissues</th></tr></thead><tbody>'
 for (r in 1:nrow(rats)) {
@@ -155,4 +160,4 @@ for (r in 1:nrow(rats)) {
 }
 html_rat <- html_rat |> str_c('</tbody></table>\n')
 
-write_file(html_rat, str_glue("{outdir}/ref/rats.html"))
+write_file(html_rat, str_glue("{outdir}/ref/{rn}.rats.html"))

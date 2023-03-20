@@ -3,8 +3,8 @@ from gtfparse import read_gtf
 from pathlib import Path
 
 parser = argparse.ArgumentParser(description='Prepare exon annotations for server API')
-parser.add_argument('input', type=str, help='GTF gene annotation file')
-parser.add_argument('outdir', type=Path, help='Output directory path')
+parser.add_argument('input', type=Path, help='GTF gene annotation file')
+parser.add_argument('output', type=Path, help='Output file name (TXT/TSV)')
 args = parser.parse_args()
 
 d = read_gtf(args.input)
@@ -36,4 +36,4 @@ d = d[
         'transcriptId',
     ]
 ]
-d.to_csv(args.outdir / 'exon.txt', sep='\t', index=False)
+d.to_csv(args.output, sep='\t', index=False)

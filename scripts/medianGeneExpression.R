@@ -2,15 +2,16 @@ suppressPackageStartupMessages(library(tidyverse))
 
 args <- commandArgs(trailingOnly = TRUE)
 indir <- args[1]
-outdir <- args[2]
-tissues <- args[3:length(args)]
+rn <- args[2]
+outdir <- args[3]
+tissues <- args[4:length(args)]
 
-genes <- read_tsv(str_glue("{outdir}/gene.txt"), col_types = "cc-------")
+genes <- read_tsv(str_glue("{outdir}/{rn}.gene.txt"), col_types = "cc-------")
 
 expr <- tibble(tissue = tissues) |>
     group_by(tissue) |>
     summarise(
-        read_tsv(str_glue("{indir}/{tissue}/{tissue}.expr.tpm.bed.gz"),
+        read_tsv(str_glue("{indir}/{rn}/{tissue}/{tissue}.expr.tpm.bed.gz"),
                  col_types = c(`#chr` = "-", start = "-", end = "-",
                                gene_id = "c", .default = "d")) |>
             pivot_longer(-gene_id, names_to = "rat_id", values_to = "tpm"),
@@ -25,7 +26,7 @@ med <- expr |>
 
 med |>
     pivot_wider(names_from = tissueSiteDetailId, values_from = median) |>
-    write_tsv(str_glue("{outdir}/medianGeneExpression.txt.gz"))
+    write_tsv(str_glue("{outdir}/{rn}.medianGeneExpression.txt.gz"))
 
 top <- med |>
     filter(geneId %in% genes$geneId) |>
@@ -39,4 +40,4 @@ top <- med |>
     mutate(datasetId = "ratgtex_v1",
            unit = "TPM")
 
-write_tsv(top, str_glue("{outdir}/topExpressedGene.txt"))
+write_tsv(top, str_glue("{outdir}/{rn}.topExpressedGene.txt"))

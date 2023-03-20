@@ -18,23 +18,29 @@ load_tensorqtl_ind <- function(tensorqtl_out) {
 
 args <- commandArgs(trailingOnly = TRUE)
 indir <- args[1]
-outdir <- args[2]
-tissues <- args[3:length(args)]
+rn <- args[2]
+outdir <- args[3]
+tissues <- args[4:length(args)]
 
-genes <- read_tsv(str_glue("{indir}/ref/Rattus_norvegicus.Rnor_6.0.99.genes.bed"),
+anno <- c(
+    rn6 = "Rattus_norvegicus.Rnor_6.0.99.genes.bed",
+    rn7 = "Rattus_norvegicus.mRatBN7.2.108.genes.bed"
+)[rn]
+
+genes <- read_tsv(str_glue("{indir}/ref_{rn}/{anno}"),
                   col_types = "-iic-c---c",
                   col_names = c("start", "end", "gene_id", "strand", "etc")) |>
     mutate(gene_name = str_match(etc, 'gene_name "([^"]+)"')[, 2],
            tss = if_else(strand == "+", start, end)) |>
     select(gene_id, gene_name, strand, tss)
 
-alleles <- read_tsv(str_glue("{indir}/geno/alleles.txt.gz"), col_types = "ccc",
+alleles <- read_tsv(str_glue("{indir}/geno_{rn}/alleles.txt.gz"), col_types = "ccc",
                     col_names = c("variant_id", "ref", "alt"))
 
 top_assoc <- tibble(tissue = tissues) |>
     group_by(tissue) |>
     summarise(
-        load_tensorqtl(str_glue("{indir}/{tissue}/splice/{tissue}_splice.cis_qtl.txt.gz")),
+        load_tensorqtl(str_glue("{indir}/{rn}/{tissue}/splice/{tissue}_splice.cis_qtl.txt.gz")),
         .groups = "drop"
     ) |>
     left_join(genes, by = "gene_id") |>
@@ -45,13 +51,13 @@ top_assoc <- tibble(tissue = tissues) |>
     relocate(tss_distance, .after = af) |>
     relocate(ref, alt, .after = pos)
 
-write_tsv(top_assoc, str_glue("{outdir}/splice/top_assoc_splice.txt"))
+write_tsv(top_assoc, str_glue("{outdir}/splice/{rn}.top_assoc_splice.txt"))
 
 sqtls_ind <- tibble(tissue = tissues) |>
     group_by(tissue) |>
     summarise(
         load_tensorqtl_ind(
-            str_glue("{indir}/{tissue}/splice/{tissue}_splice.cis_independent_qtl.txt.gz")
+            str_glue("{indir}/{rn}/{tissue}/splice/{tissue}_splice.cis_independent_qtl.txt.gz")
         ),
         .groups = "drop"
     ) |>
@@ -63,16 +69,16 @@ sqtls_ind <- tibble(tissue = tissues) |>
     relocate(tss_distance, .after = af) |>
     relocate(ref, alt, .after = pos)
 
-write_tsv(sqtls_ind, str_glue("{outdir}/splice/sqtls_indep.txt"))
+write_tsv(sqtls_ind, str_glue("{outdir}/splice/{rn}.sqtls_indep.txt"))
 
 #################################
 ## Copy and modify trans files ##
 #################################
 
 for (tissue in tissues) {
-    fname <- str_glue("{outdir}/splice/{tissue}_splice.trans_qtl_pairs.txt.gz")
+    fname <- str_glue("{outdir}/splice/{tissue}.{rn}.splice.trans_qtl_pairs.txt.gz")
     cat(str_glue("Making {fname}"), "\n", sep = "")
-    read_tsv(str_glue("{indir}/{tissue}/splice/{tissue}_splice.trans_qtl_pairs.txt.gz"),
+    read_tsv(str_glue("{indir}/{rn}/{tissue}/splice/{tissue}_splice.trans_qtl_pairs.txt.gz"),
              col_types = "cccccc") |>
         rename(slope = b,
                slope_se = b_se) |>

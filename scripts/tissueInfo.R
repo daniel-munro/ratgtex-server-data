@@ -2,13 +2,14 @@ suppressPackageStartupMessages(library(tidyverse))
 
 args <- commandArgs(trailingOnly = TRUE)
 indir <- args[1]
-outdir <- args[2]
-tissues <- args[3:length(args)]
+rn <- args[2]
+outdir <- args[3]
+tissues <- args[4:length(args)]
 
 expr <- tibble(tissueSiteDetailId = tissues) |>
     group_by(tissueSiteDetailId) |>
     summarise(
-        read_tsv(str_glue("{indir}/{tissueSiteDetailId}/{tissueSiteDetailId}.expr.tpm.bed.gz"),
+        read_tsv(str_glue("{indir}/{rn}/{tissueSiteDetailId}/{tissueSiteDetailId}.expr.tpm.bed.gz"),
                  col_types = c(`#chr` = "-", start = "-", end = "-",
                                gene_id = "c", .default = "d")) |>
             pivot_longer(-gene_id, names_to = "rat_id", values_to = "tpm") |>
@@ -20,7 +21,7 @@ expr <- tibble(tissueSiteDetailId = tissues) |>
         .groups = "drop"
     )
 
-egenes <- read_tsv(str_glue("{outdir}/eqtl/top_assoc.txt"), col_types = "cccicciccdiddddddd") |>
+egenes <- read_tsv(str_glue("{outdir}/eqtl/{rn}.top_assoc.txt"), col_types = "cccicciccdiddddddd") |>
     filter(qval < 0.05) |>
     count(tissue, name = "eGeneCount")
 
@@ -35,4 +36,4 @@ d <- d |>
     mutate(datasetId = "ratgtex_v1",
            hasEGenes = "True")
 
-write_tsv(d, str_glue("{outdir}/tissueInfo.txt"))
+write_tsv(d, str_glue("{outdir}/{rn}.tissueInfo.txt"))
