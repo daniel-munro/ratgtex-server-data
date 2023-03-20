@@ -9,7 +9,7 @@ tissues <- args[4:length(args)]
 descs <- read_tsv(
     str_glue("{indir}/ref_{rn}/GENES_RAT.txt"),
     col_types = cols(ENSEMBL_ID = "c", NAME = "c", .default = "-"),
-    skip = 83
+    comment = "#"
 ) |>
     rename(geneId = ENSEMBL_ID,
            description = NAME) |>
@@ -106,16 +106,19 @@ has_sqtl <- read_tsv(str_glue("{outdir}/splice/{rn}.sqtls_indep.txt"),
 ## Assemble
 
 anno <- c(
-    rn6 = "Rattus_norvegicus.Rnor_6.0.99.genes.bed",
-    rn7 = "Rattus_norvegicus.mRatBN7.2.108.genes.bed"
+    rn6 = "Rattus_norvegicus.Rnor_6.0.99.genes.gtf",
+    rn7 = "Rattus_norvegicus.mRatBN7.2.108.genes.gtf"
 )[rn]
 
 genes <- read_tsv(
     str_glue("{indir}/ref_{rn}/{anno}"),
-    col_types = "ciic-c---c",
-    col_names = c("chromosome", "start", "end", "geneId", "strand", "etc")
+    col_types = "c-cii-c-c",
+    col_names = c("chromosome", "type", "start", "end", "strand", "etc"),
+    comment = "#"
 ) |>
-    mutate(geneSymbol = str_match(etc, 'gene_name "([^"]+)"')[, 2],
+    filter(type == "gene") |>
+    mutate(geneId = str_match(etc, 'gene_id "([^"]+)"')[, 2],
+           geneSymbol = str_match(etc, 'gene_name "([^"]+)"')[, 2],
            tss = if_else(strand == "+", start, end)) |>
     select(geneId, geneSymbol, chromosome, start, end, strand, tss) |>
     left_join(descs, by = "geneId") |>

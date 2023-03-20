@@ -24,6 +24,11 @@ Once the [RatGTEx pipeline](https://github.com/daniel-munro/ratgtex-pipeline) is
 - `{tissue}/{tissue}.expr.log2.bed.gz`
 - `{tissue}/{tissue}.expr.tpm.bed.gz`
 - `{tissue}/{tissue}.trans_qtl_pairs.txt.gz`
+- `{tissue}/splice/{tissue}.leafcutter.bed.gz`
+- `{tissue}/splice/{tissue}.covar_splice.txt`
+- `{tissue}/splice/{tissue}_splice.cis_qtl.txt.gz`
+- `{tissue}/splice/{tissue}_splice.cis_independent_qtl.txt.gz`
+- `{tissue}/splice/{tissue}_splice.trans_qtl_pairs.txt.gz`
 
 ## Outputs (in specified output directory):
 
@@ -47,6 +52,11 @@ Once the [RatGTEx pipeline](https://github.com/daniel-munro/ratgtex-pipeline) is
 - `singleTissueEqtl.zip`
 - `tissueInfo.txt`
 - `topExpressedGene.txt`
+- `splice/top_assoc_splice.txt`
+- `splice/sqtls_indep.txt`
+- `splice/{tissue}.leafcutter.bed.gz"`
+- `splice/{tissue}.covar_splice.txt`
+- `splice/{tissue}.splice.trans_qtl_pairs.txt.gz`
 
 ## Requirements
 

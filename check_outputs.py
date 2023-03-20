@@ -14,7 +14,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 rn = args.version
-tissue_info = pd.read_csv(args.outdir / "{rn}.tissueInfo.txt", sep="\t")
+tissue_info = pd.read_csv(args.outdir / f"{rn}.tissueInfo.txt", sep="\t")
 tissues = list(tissue_info["tissueSiteDetailId"])
 
 files = []

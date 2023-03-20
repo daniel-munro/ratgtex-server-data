@@ -30,16 +30,20 @@ outdir <- args[3]
 tissues <- args[4:length(args)]
 
 anno <- c(
-    rn6 = "Rattus_norvegicus.Rnor_6.0.99.genes.bed",
-    rn7 = "Rattus_norvegicus.mRatBN7.2.108.genes.bed"
+    rn6 = "Rattus_norvegicus.Rnor_6.0.99.genes.gtf",
+    rn7 = "Rattus_norvegicus.mRatBN7.2.108.genes.gtf"
 )[rn]
 
 genes <- read_tsv(str_glue("{indir}/ref_{rn}/{anno}"),
-                  col_types = "-iic-c---c",
-                  col_names = c("start", "end", "gene_id", "strand", "etc")) |>
-    mutate(gene_name = str_match(etc, 'gene_name "([^"]+)"')[, 2],
+                  col_types = "--cii-c-c",
+                  col_names = c("type", "start", "end", "strand", "etc"),
+                  comment = "#") |>
+    filter(type == "gene") |>
+    mutate(gene_id = str_match(etc, 'gene_id "([^"]+)"')[, 2],
+           gene_name = str_match(etc, 'gene_name "([^"]+)"')[, 2],
            tss = if_else(strand == "+", start, end)) |>
     select(gene_id, gene_name, strand, tss)
+stopifnot(sum(duplicated(genes$gene_id)) == 0)
 
 alleles <- read_tsv(str_glue("{indir}/geno_{rn}/alleles.txt.gz"), col_types = "ccc",
                     col_names = c("variant_id", "ref", "alt"))

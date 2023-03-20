@@ -81,12 +81,8 @@ rats <- samples |>
     group_by(rat_id) |>
     summarise(tissues = str_c(tissue, collapse = ", "))
 
-geno_log <- c(
-    rn6 = "genotyping_log.csv",
-    rn7 = "original/Heterogenous-stock_n15552_02222023_stitch2_QC_Sex_Het_pass_n14505_genotype_log.csv"
-)[rn]
 meta <- read_csv(
-    str_glue("{indir}/geno_{rn}/{geno_log}"),
+    str_glue("{indir}/geno_{rn}/genotyping_log.csv"),
     col_types = cols(rfid = "c", sex = "c", coatcolor = "c", .default = "-")
 ) |>
     rename(rat_id = rfid) |> # In this file, all sample_name are unique and identical to rfid
