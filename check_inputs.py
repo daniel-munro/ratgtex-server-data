@@ -60,6 +60,7 @@ for tissue in tissues:
         f"{tissue}.covar_splice.txt",
         f"{tissue}_splice.cis_qtl.txt.gz",
         f"{tissue}_splice.cis_independent_qtl.txt.gz",
+        f"{tissue}_splice.cis_qtl_signif.txt.gz",
         f"{tissue}_splice.trans_qtl_pairs.txt.gz",
     ]
     files += [args.indir / rn / tissue / "splice" / fname for fname in fnames]

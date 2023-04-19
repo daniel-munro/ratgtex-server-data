@@ -75,6 +75,24 @@ sqtls_ind <- tibble(tissue = tissues) |>
 
 write_tsv(sqtls_ind, str_glue("{outdir}/splice/{rn}.sqtls_indep.txt"))
 
+##################################
+## Copy and modify signif files ##
+##################################
+
+for (tissue in tissues) {
+    fname <- str_glue("{outdir}/splice/{tissue}.{rn}.splice.cis_qtl_signif.txt.gz")
+    cat(str_glue("Making {fname}"), "\n", sep = "")
+    read_tsv(str_glue("{indir}/{rn}/{tissue}/splice/{tissue}_splice.cis_qtl_signif.txt.gz"),
+             col_types = "cccccccccc") |>
+        separate(variant_id, c("chrom", "pos"), sep = ":", convert = TRUE,
+                 remove = FALSE) |>
+        mutate(gene_id = str_match(phenotype_id, ":([^:]+)$")[, 2]) |>
+        left_join(select(genes, gene_id, strand, tss), by = "gene_id") |>
+        mutate(tss_distance = if_else(strand == "+", pos - tss, tss - pos)) |>
+        select(-gene_id, -chrom, -pos, -strand, -tss) |>
+        write_tsv(fname)
+}
+
 #################################
 ## Copy and modify trans files ##
 #################################
