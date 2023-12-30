@@ -85,8 +85,9 @@ meta <- read_csv(
     str_glue("{indir}/geno_{rn}/genotyping_log.csv"),
     col_types = cols(rfid = "c", sex = "c", coatcolor = "c", .default = "-")
 ) |>
-    rename(rat_id = rfid) |> # In this file, all sample_name are unique and identical to rfid
+    rename(rat_id = rfid) |>
     mutate(
+        rat_id = str_replace(rat_id, "-", "_"), # Adipose/Liver samples originally contain '_' but contain '-' here
         coatcolor = coatcolor |> # Collapse equivalent labels
             str_to_upper() |>
             str_replace("BLK HOOD", "BLACKHOOD") |>
@@ -95,7 +96,16 @@ meta <- read_csv(
 
 rats <- rats |>
     left_join(meta, by = "rat_id") |>
-    relocate(tissues, .after = "coatcolor")
+    # relocate(tissues, .after = "coatcolor")
+    select(rat_id, sex, coatcolor, tissues)
+
+# Adipose and Liver rats don't have sex/coat metadata, but are all males re correspondence with PI
+rats_adi_liv <- samples |>
+    filter(tissue %in% c("Adipose", "Liver")) |>
+    distinct(rat_id) |>
+    pull()
+rats <- rats |>
+    mutate(sex = if_else(is.na(sex) & rat_id %in% rats_adi_liv, "M", sex))
 
 write_tsv(samples, str_glue("{outdir}/ref/{rn}.RatGTEx_samples.tsv"))
 
