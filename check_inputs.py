@@ -77,7 +77,3 @@ for file in files:
     if not file.exists():
         print(f"{file} is missing")
         any_missing = True
-
-if not any_missing:
-    print("All necessary files are present.")
-    print("Remember to update site HTML files as needed, including copying data from rats.html and samples.html into about/samples/index.html.")
