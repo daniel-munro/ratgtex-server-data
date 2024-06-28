@@ -42,15 +42,14 @@ alleles <- read_tsv(str_glue("{indir}/geno_{rn}/alleles.txt.gz"), col_types = "c
                     col_names = c("variant_id", "ref", "alt"))
 
 top_assoc <- tibble(tissue = tissues) |>
-    group_by(tissue) |>
-    summarise(
+    reframe(
         load_tensorqtl(str_glue("{indir}/{rn}/{tissue}/splice/{tissue}_splice.cis_qtl.txt.gz")),
-        .groups = "drop"
+        .by = tissue
     ) |>
-    left_join(genes, by = "gene_id") |>
+    left_join(genes, by = "gene_id", relationship = "many-to-one") |>
     mutate(tss_distance = if_else(strand == "+", pos - tss, tss - pos)) |>
     select(-strand, -tss) |>
-    left_join(alleles, by = "variant_id") |>
+    left_join(alleles, by = "variant_id", relationship = "many-to-one") |>
     relocate(gene_name, .after = gene_id) |>
     relocate(tss_distance, .after = af) |>
     relocate(ref, alt, .after = pos)
@@ -58,17 +57,16 @@ top_assoc <- tibble(tissue = tissues) |>
 write_tsv(top_assoc, str_glue("{outdir}/splice/{rn}.top_assoc_splice.txt"))
 
 sqtls_ind <- tibble(tissue = tissues) |>
-    group_by(tissue) |>
-    summarise(
+    reframe(
         load_tensorqtl_ind(
             str_glue("{indir}/{rn}/{tissue}/splice/{tissue}_splice.cis_independent_qtl.txt.gz")
         ),
-        .groups = "drop"
+        .by = tissue
     ) |>
-    left_join(genes, by = "gene_id") |>
+    left_join(genes, by = "gene_id", relationship = "many-to-one") |>
     mutate(tss_distance = if_else(strand == "+", pos - tss, tss - pos)) |>
     select(-strand, -tss) |>
-    left_join(alleles, by = "variant_id") |>
+    left_join(alleles, by = "variant_id", relationship = "many-to-one") |>
     relocate(gene_name, .after = gene_id) |>
     relocate(tss_distance, .after = af) |>
     relocate(ref, alt, .after = pos)
@@ -87,7 +85,7 @@ for (tissue in tissues) {
         separate(variant_id, c("chrom", "pos"), sep = ":", convert = TRUE,
                  remove = FALSE) |>
         mutate(gene_id = str_match(phenotype_id, ":([^:]+)$")[, 2]) |>
-        left_join(select(genes, gene_id, strand, tss), by = "gene_id") |>
+        left_join(select(genes, gene_id, strand, tss), by = "gene_id", relationship = "many-to-one") |>
         mutate(tss_distance = if_else(strand == "+", pos - tss, tss - pos)) |>
         select(-gene_id, -chrom, -pos, -strand, -tss) |>
         write_tsv(fname)

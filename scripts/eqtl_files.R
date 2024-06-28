@@ -49,23 +49,21 @@ alleles <- read_tsv(str_glue("{indir}/geno_{rn}/alleles.txt.gz"), col_types = "c
                     col_names = c("variant_id", "ref", "alt"))
 
 afc <- tibble(tissue = tissues) |>
-    group_by(tissue) |>
-    summarise(
+    reframe(
         load_afc(str_glue("{indir}/{rn}/{tissue}/{tissue}.aFC.txt")),
-        .groups = "drop"
+        .by = tissue
     )
 
 top_assoc <- tibble(tissue = tissues) |>
-    group_by(tissue) |>
-    summarise(
+    reframe(
         load_tensorqtl(str_glue("{indir}/{rn}/{tissue}/{tissue}.cis_qtl.txt.gz")),
-        .groups = "drop"
+        .by = tissue
     ) |>
-    left_join(afc, by = c("tissue", "gene_id", "variant_id")) |>
-    left_join(genes, by = "gene_id") |>
+    left_join(afc, by = c("tissue", "gene_id", "variant_id"), relationship = "one-to-one") |>
+    left_join(genes, by = "gene_id", relationship = "many-to-one") |>
     mutate(tss_distance = if_else(strand == "+", pos - tss, tss - pos)) |>
     select(-strand, -tss) |>
-    left_join(alleles, by = "variant_id") |>
+    left_join(alleles, by = "variant_id", relationship = "many-to-one") |>
     relocate(gene_name, .after = gene_id) |>
     relocate(tss_distance, .after = af) |>
     relocate(ref, alt, .after = pos)
@@ -73,18 +71,17 @@ top_assoc <- tibble(tissue = tissues) |>
 write_tsv(top_assoc, str_glue("{outdir}/eqtl/{rn}.top_assoc.txt"))
 
 eqtls_ind <- tibble(tissue = tissues) |>
-    group_by(tissue) |>
-    summarise(
+    reframe(
         load_tensorqtl_ind(
             str_glue("{indir}/{rn}/{tissue}/{tissue}.cis_independent_qtl.txt.gz")
         ),
-        .groups = "drop"
+        .by = tissue
     ) |>
-    left_join(afc, by = c("tissue", "gene_id", "variant_id")) |>
-    left_join(genes, by = "gene_id") |>
+    left_join(afc, by = c("tissue", "gene_id", "variant_id"), relationship = "one-to-one") |>
+    left_join(genes, by = "gene_id", relationship = "many-to-one") |>
     mutate(tss_distance = if_else(strand == "+", pos - tss, tss - pos)) |>
     select(-strand, -tss) |>
-    left_join(alleles, by = "variant_id") |>
+    left_join(alleles, by = "variant_id", relationship = "many-to-one") |>
     relocate(gene_name, .after = gene_id) |>
     relocate(tss_distance, .after = af) |>
     relocate(ref, alt, .after = pos)
@@ -103,7 +100,7 @@ for (tissue in tissues) {
         rename(gene_id = phenotype_id) |>
         separate(variant_id, c("chrom", "pos"), sep = ":", convert = TRUE,
                  remove = FALSE) |>
-        left_join(select(genes, gene_id, strand, tss), by = "gene_id") |>
+        left_join(select(genes, gene_id, strand, tss), by = "gene_id", relationship = "many-to-one") |>
         mutate(tss_distance = if_else(strand == "+", pos - tss, tss - pos)) |>
         select(-chrom, -pos, -strand, -tss) |>
         write_tsv(fname)

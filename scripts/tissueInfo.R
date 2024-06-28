@@ -7,8 +7,7 @@ outdir <- args[3]
 tissues <- args[4:length(args)]
 
 expr <- tibble(tissueSiteDetailId = tissues) |>
-    group_by(tissueSiteDetailId) |>
-    summarise(
+    reframe(
         read_tsv(str_glue("{indir}/{rn}/{tissueSiteDetailId}/{tissueSiteDetailId}.expr.tpm.bed.gz"),
                  col_types = c(`#chr` = "-", start = "-", end = "-",
                                gene_id = "c", .default = "d")) |>
@@ -18,7 +17,7 @@ expr <- tibble(tissueSiteDetailId = tissues) |>
             ungroup() |>
             summarise(rnaSeqSampleCount = n_distinct(rat_id),
                       expressedGeneCount = n_distinct(gene_id)),
-        .groups = "drop"
+        .by = tissueSiteDetailId
     )
 
 egenes <- read_tsv(str_glue("{outdir}/eqtl/{rn}.top_assoc.txt"), col_types = "cccicciccdiddddddd") |>
@@ -30,9 +29,9 @@ stopifnot(all(tissues %in% d$tissueSiteDetailId))
 d <- d |>
     filter(tissueSiteDetailId %in% tissues) |>
     mutate(tissueSiteDetailAbbr = tissueSiteDetailId, .after = tissueSiteDetailId) |>
-    left_join(expr, by = "tissueSiteDetailId") |>
+    left_join(expr, by = "tissueSiteDetailId", relationship = "one-to-one") |>
     mutate(rnaSeqAndGenotypeSampleCount = rnaSeqSampleCount, .after = rnaSeqSampleCount) |>
-    left_join(egenes, by = c("tissueSiteDetailId" = "tissue")) |>
+    left_join(egenes, by = c("tissueSiteDetailId" = "tissue"), relationship = "one-to-one") |>
     mutate(datasetId = "ratgtex_v1",
            hasEGenes = "True")
 

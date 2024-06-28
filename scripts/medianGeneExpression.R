@@ -9,13 +9,12 @@ tissues <- args[4:length(args)]
 genes <- read_tsv(str_glue("{outdir}/{rn}.gene.txt"), col_types = "cc-------")
 
 expr <- tibble(tissue = tissues) |>
-    group_by(tissue) |>
-    summarise(
+    reframe(
         read_tsv(str_glue("{indir}/{rn}/{tissue}/{tissue}.expr.tpm.bed.gz"),
                  col_types = c(`#chr` = "-", start = "-", end = "-",
                                gene_id = "c", .default = "d")) |>
             pivot_longer(-gene_id, names_to = "rat_id", values_to = "tpm"),
-        .groups = "drop"
+        .by = tissue
     ) |>
     rename(tissueSiteDetailId = tissue,
            geneId = gene_id)
@@ -30,7 +29,7 @@ med |>
 
 top <- med |>
     filter(geneId %in% genes$geneId) |>
-    left_join(genes, by = "geneId") |>
+    left_join(genes, by = "geneId", relationship = "many-to-one") |>
     mutate(mtGene = if_else(str_sub(geneSymbol, 1, 3) == "Mt-", "True", "False")) |>
     arrange(tissueSiteDetailId, desc(median)) |>
     group_by(tissueSiteDetailId) |>

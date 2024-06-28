@@ -60,22 +60,20 @@ to_trim <- c("IL", "LHb", "NAcc", "OFC", "PL") # IDs have tissue appended to rat
 
 geo <- tibble(tissue = tissues) |>
     filter(tissue %in% names(accession)) |>
-    group_by(tissue) |>
-    summarise(
+    reframe(
         load_geo(
             str_glue("{indir}/samples/{accession[tissue]}_series_matrix.txt.gz"),
             tissue %in% to_trim
         ),
-        .groups = "drop"
+        .by = tissue
     )
 
 samples <- tibble(tissue = tissues) |>
-    group_by(tissue) |>
-    summarise(
+    reframe(
         tibble(rat_id = read_lines(str_glue("{indir}/{rn}/{tissue}/rat_ids.txt"))),
-        .groups = "drop"
+        .by = tissue
     ) |>
-    left_join(geo, by = c("tissue", "rat_id"))
+    left_join(geo, by = c("tissue", "rat_id"), relationship = "one-to-one")
 
 rats <- samples |>
     group_by(rat_id) |>
@@ -95,7 +93,7 @@ meta <- read_csv(
     )
 
 rats <- rats |>
-    left_join(meta, by = "rat_id") |>
+    left_join(meta, by = "rat_id", relationship = "one-to-one") |>
     # relocate(tissues, .after = "coatcolor")
     select(rat_id, sex, coatcolor, tissues)
 

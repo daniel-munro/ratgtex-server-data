@@ -51,8 +51,8 @@ Once the [RatGTEx pipeline](https://github.com/daniel-munro/ratgtex-pipeline) is
 - `rat_ids/{tissue}.{rn}.rat_ids.txt`
 - `ref/{rn}.RatGTEx_rats.tsv`
 - `ref/{rn}.RatGTEx_samples.tsv`
-- `ref/{rn}.rats.html`: This HTML table must be copied into `/about/samples/index.html`
-- `ref/{rn}.samples.html`: This HTML table must be copied into `/about/samples/index.html`
+- `ref/{rn}.rats.html`: Jekyll will insert this HTML table into the About Samples page.
+- `ref/{rn}.samples.html`: Jekyll will insert this HTML table into the About Samples page.
 - `splice/{rn}.top_assoc_splice.txt`
 - `splice/{rn}.sqtls_indep.txt`
 - `splice/{tissue}.{rn}.leafcutter.bed.gz"`
@@ -76,5 +76,4 @@ Run `check_inputs.py` to check if all necessary input files exist. If so, run `r
 Then, do these additional steps:
 
 1. Run `check_outputs.py` to check if all necessary files have been created/copied.
-2. Copy the contents of `ref/rats.html` and `ref/samples.html` into `/about/samples/index.html` in the site directory, replacing the old tables.
-3. `{outdir}/studies/{tissues}/` contain data directly used in the original publications, which may or may not differ from the data from the unified RatGTEx pipeline. These aren't used in the portal except to be available for download. Copy any files to this location and add links to them on the original study data section of the downloads page.
+2. `{outdir}/studies/{tissues}/` contain data directly used in the original publications, which may or may not differ from the data from the unified RatGTEx pipeline. These aren't used in the portal except to be available for download. Copy any files to this location and add links to them on the original study data page.
