@@ -2,7 +2,6 @@
 
 import argparse
 from pathlib import Path
-import pandas as pd
 import yaml
 
 parser = argparse.ArgumentParser(
@@ -11,28 +10,21 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "indir", type=Path, help="Path to the RatGTEx pipeline base directory"
 )
-parser.add_argument(
-    "version", type=str, help="rn6 or rn7. Only checks the files for this version."
-)
 args = parser.parse_args()
 
-rn = args.version
+version = "v3"
 config = yaml.safe_load(open(args.indir / "config.yaml"))
-tissues = [tissue for tissue in config if (args.indir / rn / tissue).exists()]
+tissues = [tissue for tissue in config["tissues"] if (args.indir / version / tissue).exists()]
 
 files = []
 
-anno = {
-    "rn6": args.indir / "ref_rn6" / "Rattus_norvegicus.Rnor_6.0.99.genes.gtf",
-    "rn7": args.indir / "ref_rn7" / "Rattus_norvegicus.mRatBN7.2.108.genes.gtf",
-}[rn]
+anno = args.indir / "ref" / "GCF_015227675.2_mRatBN7.2_genomic.chr.genes.gtf"
 files.append(anno)
 
 general = [
-    args.indir / f"geno_{rn}" / "alleles.txt.gz",
-    args.indir / f"geno_{rn}" / "genotyping_log.csv",
+    args.indir / f"geno" / "alleles.txt.gz",
+    args.indir / f"geno" / "genotyping_log.csv",
     args.indir / "tissue_info.txt",
-    args.indir / f"ref_{rn}" / "GENES_RAT.txt",
 ]
 files += general
 
@@ -54,7 +46,7 @@ for tissue in tissues:
         f"{tissue}.expr.tpm.bed.gz",
         f"{tissue}.trans_qtl_pairs.txt.gz",
     ]
-    files += [args.indir / rn / tissue / fname for fname in fnames]
+    files += [args.indir / version / tissue / fname for fname in fnames]
     fnames = [
         f"{tissue}.leafcutter.bed.gz",
         f"{tissue}.covar_splice.txt",
@@ -63,11 +55,11 @@ for tissue in tissues:
         f"{tissue}_splice.cis_qtl_signif.txt.gz",
         f"{tissue}_splice.trans_qtl_pairs.txt.gz",
     ]
-    files += [args.indir / rn / tissue / "splice" / fname for fname in fnames]
+    files += [args.indir / version / tissue / "splice" / fname for fname in fnames]
 
 datasets = list(set(config[tissue]['geno_dataset'] for tissue in tissues))
 for ext in ["vcf.gz", "vcf.gz.tbi"]:
-    files += [args.indir / f"geno_{rn}" / f"{dataset}.{ext}" for dataset in datasets]
+    files += [args.indir / f"geno" / f"{dataset}.{ext}" for dataset in datasets]
 
 print("Tissues that will be included:")
 print(" ".join(tissues))
