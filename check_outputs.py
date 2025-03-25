@@ -57,8 +57,8 @@ files += [args.outdir / "geno" / x for x in geno]
 splice = [f"top_assoc_splice.{v}.txt", f"sqtls_indep.{v}.txt"]
 splice += [f"leafcutter.{tissue}.{v}.bed.gz" for tissue in tissues]
 splice += [f"covar_splice.{tissue}.{v}.txt" for tissue in tissues]
-splice += [f"cis_qtl_signif.{tissue}.{v}.txt.gz" for tissue in tissues]
-splice += [f"trans_qtl_pairs.{tissue}.{v}.txt.gz" for tissue in tissues]
+splice += [f"splice.cis_qtl_signif.{tissue}.{v}.txt.gz" for tissue in tissues]
+splice += [f"splice.trans_qtl_pairs.{tissue}.{v}.txt.gz" for tissue in tissues]
 files += [args.outdir / "splice" / x for x in splice]
 
 any_missing = False

@@ -57,6 +57,7 @@ This code is designed to run only the latest RatGTEx data version, but files are
 - `splice/sqtls_indep.v3_rn7.txt`
 - `splice/leafcutter.{tissue}.v3_rn7.bed.gz"`
 - `splice/covar_splice.{tissue}.v3_rn7.txt`
+- `splice/splice.cis_qtl_signif.{tissue}.v3_rn7.txt.gz`
 - `splice/splice.trans_qtl_pairs.{tissue}.v3_rn7.txt.gz`
 
 ## Requirements

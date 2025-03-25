@@ -6,7 +6,7 @@ import zipfile
 
 parser = argparse.ArgumentParser(description='Save all cis p-values in zip archive of per-gene files')
 parser.add_argument('indir', type=Path, help='Path to the RatGTEx pipeline base directory')
-parser.add_argument("version", type=str, help="rn6 or rn7")
+parser.add_argument("version", type=str, help="e.g. v3")
 parser.add_argument('outdir', type=Path, help='Output directory path')
 parser.add_argument('tissue', help='Tissue whose cis p-values are to be processed')
 args = parser.parse_args()

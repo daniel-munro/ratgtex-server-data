@@ -2,13 +2,15 @@ suppressPackageStartupMessages(library(tidyverse))
 
 args <- commandArgs(trailingOnly = TRUE)
 indir <- args[1]
-rn <- args[2]
-outdir <- args[3]
-tissues <- args[4:length(args)]
+outdir <- args[2]
+tissues <- args[3:length(args)]
+
+version <- "v3"
+v <- "v3_rn7"
 
 expr <- tibble(tissueSiteDetailId = tissues) |>
     reframe(
-        read_tsv(str_glue("{indir}/{rn}/{tissueSiteDetailId}/{tissueSiteDetailId}.expr.tpm.bed.gz"),
+        read_tsv(str_glue("{indir}/{version}/{tissueSiteDetailId}/{tissueSiteDetailId}.expr.tpm.bed.gz"),
                  col_types = c(`#chr` = "-", start = "-", end = "-",
                                gene_id = "c", .default = "d")) |>
             pivot_longer(-gene_id, names_to = "rat_id", values_to = "tpm") |>
@@ -20,11 +22,11 @@ expr <- tibble(tissueSiteDetailId = tissues) |>
         .by = tissueSiteDetailId
     )
 
-egenes <- read_tsv(str_glue("{outdir}/eqtl/{rn}.top_assoc.txt"), col_types = "cccicciccdiddddddd") |>
+egenes <- read_tsv(str_glue("{outdir}/eqtl/top_assoc.{v}.txt"), col_types = "cccicciccdiddddddd") |>
     filter(qval < 0.05) |>
     count(tissue, name = "eGeneCount")
 
-d <- read_tsv(str_glue("{indir}/tissue_info.txt"), col_types = "cccccc")
+d <- read_tsv(str_glue("{indir}/tissue_info.txt"), col_types = "ccccc")
 stopifnot(all(tissues %in% d$tissueSiteDetailId))
 d <- d |>
     filter(tissueSiteDetailId %in% tissues) |>
@@ -35,4 +37,4 @@ d <- d |>
     mutate(datasetId = "ratgtex_v1",
            hasEGenes = "True")
 
-write_tsv(d, str_glue("{outdir}/{rn}.tissueInfo.txt"))
+write_tsv(d, str_glue("{outdir}/tissueInfo.{v}.txt"))

@@ -43,9 +43,8 @@ load_geo <- function(filename, trim_ids = FALSE) {
 
 args <- commandArgs(trailingOnly = TRUE)
 indir <- args[1]
-rn <- args[2]
-outdir <- args[3]
-tissues <- args[4:length(args)]
+outdir <- args[2]
+tissues <- args[3:length(args)]
 # tissues <- c("Adipose", "BLA", "Brain", "Eye", "IL", "LHb", "Liver", "NAcc", "NAcc2", "OFC", "PL", "PL2")
 
 accession <- c(

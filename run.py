@@ -46,7 +46,7 @@ if not (args.keep_existing and all(file.exists() for file in outfiles)):
     print("Assembling eQTL files", flush=True)
     script = Path(__file__).parent / "scripts" / "eqtl_files.R"
     subprocess.run(
-        ["Rscript", script, str(args.indir), rn, str(args.outdir), *tissues],
+        ["Rscript", script, str(args.indir), str(args.outdir), *tissues],
         check=True,
     )
 
@@ -58,7 +58,7 @@ if not (args.keep_existing and all(file.exists() for file in outfiles)):
     print("Assembling sQTL files", flush=True)
     script = Path(__file__).parent / "scripts" / "sqtl_files.R"
     subprocess.run(
-        ["Rscript", script, str(args.indir), rn, str(args.outdir), *tissues],
+        ["Rscript", script, str(args.indir), str(args.outdir), *tissues],
         check=True,
     )
 outfiles = [args.outdir / "splice" / f"leafcutter.{tissue}.{v}.bed.gz" for tissue in tissues]
@@ -66,17 +66,19 @@ outfiles += [args.outdir / "splice" / f"covar_splice.{tissue}.{v}.txt" for tissu
 if not (args.keep_existing and all(file.exists() for file in outfiles)):
     print("Copying splicing phenotype and covariate files", flush=True)
     for tissue in tissues:
-        for suffix in ["leafcutter.bed.gz", "covar_splice.txt"]:
-            infile = args.indir / rn / tissue / "splice" / f"{tissue}.{suffix}"
-            outfile = args.outdir / "splice" / f"{tissue}.{v}.{suffix}"
-            subprocess.run(["cp", str(infile), str(outfile)], check=True)
+        infile = args.indir / rn / tissue / "splice" / f"{tissue}.leafcutter.bed.gz"
+        outfile = args.outdir / "splice" / f"leafcutter.{tissue}.{v}.bed.gz"
+        subprocess.run(["cp", str(infile), str(outfile)], check=True)
+        infile = args.indir / rn / tissue / "splice" / f"{tissue}.covar_splice.txt"
+        outfile = args.outdir / "splice" / f"covar_splice.{tissue}.{v}.txt"
+        subprocess.run(["cp", str(infile), str(outfile)], check=True)
 
 ## Tissue info table
 if not (args.keep_existing and (args.outdir / f"tissueInfo.{v}.txt").exists()):
     print("Making tissue info table", flush=True)
     script = Path(__file__).parent / "scripts" / "tissueInfo.R"
     subprocess.run(
-        ["Rscript", script, str(args.indir), rn, str(args.outdir), *tissues],
+        ["Rscript", script, str(args.indir), str(args.outdir), *tissues],
         check=True,
     )
 
@@ -86,7 +88,7 @@ if not (args.keep_existing and all(file.exists() for file in outfiles)):
     print("Assembling gene info", flush=True)
     script = Path(__file__).parent / "scripts" / "gene.R"
     subprocess.run(
-        ["Rscript", script, str(args.indir), rn, str(args.outdir), *tissues],
+        ["Rscript", script, str(args.indir), str(args.outdir), *tissues],
         check=True,
     )
 
@@ -98,7 +100,7 @@ if not (args.keep_existing and all(file.exists() for file in outfiles)):
     print("Summarizing gene expression", flush=True)
     script = Path(__file__).parent / "scripts" / "medianGeneExpression.R"
     subprocess.run(
-        ["Rscript", script, str(args.indir), rn, str(args.outdir), *tissues],
+        ["Rscript", script, str(args.indir), str(args.outdir), *tissues],
         check=True,
     )
 
@@ -115,7 +117,7 @@ if not (args.keep_existing and (args.outdir / f"singleTissueEqtl.{v}.zip").exist
     print("Assembling all significant cis-eQTL associations", flush=True)
     script = Path(__file__).parent / "scripts" / "singleTissueEqtl.py"
     subprocess.run(
-        ["python3", script, str(args.indir), rn, str(args.outdir), *tissues],
+        ["python3", script, str(args.indir), str(args.outdir), *tissues],
         check=True,
     )
 
@@ -127,7 +129,7 @@ if not (args.keep_existing and all(file.exists() for file in outfiles)):
     for tissue in tissues:
         print(tissue, flush=True)
         subprocess.run(
-            ["python3", script, str(args.indir), rn, str(args.outdir), tissue], check=True
+            ["python3", script, str(args.indir), version, str(args.outdir), tissue], check=True
         )
 
 ## Rat and sample info tables
@@ -137,7 +139,7 @@ if not (args.keep_existing and all(file.exists() for file in outfiles)):
     print("Making sample and rat info tables", flush=True)
     script = Path(__file__).parent / "scripts" / "sample_table.R"
     subprocess.run(
-        ["Rscript", script, str(args.indir), rn, str(args.outdir), *tissues],
+        ["Rscript", script, str(args.indir), str(args.outdir), *tissues],
         check=True,
     )
 
