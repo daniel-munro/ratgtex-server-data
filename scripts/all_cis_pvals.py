@@ -1,4 +1,12 @@
-"""Save all cis p-values in zip archive of per-gene files"""
+"""Save all cis p-values in zip archive of per-gene files
+
+Inputs:
+    {indir}/{version}/{tissue}/{tissue}.cis_qtl_all_pvals.txt.gz
+
+Outputs:
+    {outdir}/cis_pvals/{tissue}.{version}.zip
+"""
+
 import argparse
 import gzip
 from pathlib import Path

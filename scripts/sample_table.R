@@ -1,3 +1,16 @@
+# Generate sample and rat tables for web interface
+#
+# Inputs:
+#   {indir}/geno/genotyping_log.csv
+#   {indir}/samples/{geo_accession}_series_matrix.txt.gz
+#   {indir}/{version}/{tissue}/rat_ids.txt
+#
+# Outputs:
+#   {outdir}/ref/RatGTEx_rats.{v}.html
+#   {outdir}/ref/RatGTEx_rats.{v}.tsv
+#   {outdir}/ref/RatGTEx_samples.{v}.html
+#   {outdir}/ref/RatGTEx_samples.{v}.tsv
+
 suppressPackageStartupMessages(library(tidyverse))
 
 field_values <- function(lines, field_name, keyword = NULL) {
@@ -45,7 +58,9 @@ args <- commandArgs(trailingOnly = TRUE)
 indir <- args[1]
 outdir <- args[2]
 tissues <- args[3:length(args)]
-# tissues <- c("Adipose", "BLA", "Brain", "Eye", "IL", "LHb", "Liver", "NAcc", "NAcc2", "OFC", "PL", "PL2")
+
+version <- "v3"
+v <- "v3_rn7"
 
 accession <- c(
     Eye = "GSE201236",
@@ -69,7 +84,7 @@ geo <- tibble(tissue = tissues) |>
 
 samples <- tibble(tissue = tissues) |>
     reframe(
-        tibble(rat_id = read_lines(str_glue("{indir}/{rn}/{tissue}/rat_ids.txt"))),
+        tibble(rat_id = read_lines(str_glue("{indir}/{version}/{tissue}/rat_ids.txt"))),
         .by = tissue
     ) |>
     left_join(geo, by = c("tissue", "rat_id"), relationship = "one-to-one")
@@ -79,12 +94,11 @@ rats <- samples |>
     summarise(tissues = str_c(tissue, collapse = ", "))
 
 meta <- read_csv(
-    str_glue("{indir}/geno_{rn}/genotyping_log.csv"),
+    str_glue("{indir}/geno/genotyping_log.csv"),
     col_types = cols(rfid = "c", sex = "c", coatcolor = "c", .default = "-")
 ) |>
     rename(rat_id = rfid) |>
     mutate(
-        rat_id = str_replace(rat_id, "-", "_"), # Adipose/Liver samples originally contain '_' but contain '-' here
         coatcolor = coatcolor |> # Collapse equivalent labels
             str_to_upper() |>
             str_replace("BLK HOOD", "BLACKHOOD") |>
@@ -93,7 +107,6 @@ meta <- read_csv(
 
 rats <- rats |>
     left_join(meta, by = "rat_id", relationship = "one-to-one") |>
-    # relocate(tissues, .after = "coatcolor")
     select(rat_id, sex, coatcolor, tissues)
 
 # Adipose and Liver rats don't have sex/coat metadata, but are all males re correspondence with PI
@@ -104,9 +117,9 @@ rats_adi_liv <- samples |>
 rats <- rats |>
     mutate(sex = if_else(is.na(sex) & rat_id %in% rats_adi_liv, "M", sex))
 
-write_tsv(samples, str_glue("{outdir}/ref/{rn}.RatGTEx_samples.tsv"))
+write_tsv(samples, str_glue("{outdir}/ref/RatGTEx_samples.{v}.tsv"))
 
-write_tsv(rats, str_glue("{outdir}/ref/{rn}.RatGTEx_rats.tsv"))
+write_tsv(rats, str_glue("{outdir}/ref/RatGTEx_rats.{v}.tsv"))
 
 ###################
 ## Write to HTML ##
@@ -134,7 +147,7 @@ for (r in 1:nrow(samples)) {
 }
 html_sam <- html_sam |> str_c('</tbody></table>\n')
 
-write_file(html_sam, str_glue("{outdir}/ref/{rn}.samples.html"))
+write_file(html_sam, str_glue("{outdir}/ref/RatGTEx_samples.{v}.html"))
 
 html_rat <- '<table id="rat-table"><thead><tr><th>Rat ID</th><th>Sex</th><th>Coat Color</th><th>Tissues</th></tr></thead><tbody>'
 for (r in 1:nrow(rats)) {
@@ -163,4 +176,4 @@ for (r in 1:nrow(rats)) {
 }
 html_rat <- html_rat |> str_c('</tbody></table>\n')
 
-write_file(html_rat, str_glue("{outdir}/ref/{rn}.rats.html"))
+write_file(html_rat, str_glue("{outdir}/ref/RatGTEx_rats.{v}.html"))

@@ -1,3 +1,20 @@
+# Process eQTL results from tensorQTL for web interface
+#
+# Inputs:
+#   {indir}/geno/alleles.txt.gz
+#   {indir}/ref/GCF_015227675.2_mRatBN7.2_genomic.chr.genes.gtf
+#   {indir}/v3/{tissue}/{tissue}.aFC.txt
+#   {indir}/v3/{tissue}/{tissue}.cis_independent_qtl.txt.gz
+#   {indir}/v3/{tissue}/{tissue}.cis_qtl.txt.gz
+#   {indir}/v3/{tissue}/{tissue}.cis_qtl_signif.txt.gz
+#   {indir}/v3/{tissue}/{tissue}.trans_qtl_pairs.txt.gz
+#
+# Outputs:
+#   {outdir}/eqtl/cis_qtl_signif.{tissue}.v3_rn7.txt.gz
+#   {outdir}/eqtl/eqtls_indep.{tissue}.v3_rn7.txt
+#   {outdir}/eqtl/top_assoc.{tissue}.v3_rn7.txt
+#   {outdir}/eqtl/trans_qtl_pairs.{tissue}.v3_rn7.txt.gz
+
 suppressPackageStartupMessages(library(tidyverse))
 
 load_tensorqtl <- function(tensorqtl_out) {

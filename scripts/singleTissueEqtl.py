@@ -1,4 +1,11 @@
-"""Assemble all significant cis associations in zip archive of per-gene files"""
+"""Assemble all significant cis associations in zip archive of per-gene files
+
+Inputs:
+    {indir}/{version}/{tissue}/{tissue}.cis_qtl_signif.txt.gz
+
+Outputs:
+    {outdir}/singleTissueEqtl.{version}.zip
+"""
 
 import argparse
 from pathlib import Path
@@ -28,16 +35,13 @@ for tissue in args.tissues:
             "slope": "nes",
         }
     )
-    # d["chromosome"] = d["variantId"].str.extract(r"chr(\d+):\d+$")
-    # d["pos"] = d["variantId"].str.extract(r"chr\d+:(\d+)$")
     d[["chromosome", "pos"]] = d["variantId"].str.split(":", expand=True)
-    d["chromosome"] = d["chromosome"].str.replace("chr", "")
     d["tissueSiteDetailId"] = tissue
     sig.append(d)
 
 sig = pd.concat(sig)
 
-outfile = args.outdir / f"{args.version}.singleTissueEqtl.zip"
+outfile = args.outdir / f"singleTissueEqtl.{args.version}.zip"
 with zipfile.ZipFile(outfile, 'w', zipfile.ZIP_DEFLATED) as out:
     for gene, d in sig.groupby("phenotype_id"):
         d = d.drop(columns=["phenotype_id"])
@@ -46,4 +50,4 @@ with zipfile.ZipFile(outfile, 'w', zipfile.ZIP_DEFLATED) as out:
             index=False,
             float_format="%g",
         )
-        out.writestr(f"{args.version}.singleTissueEqtl/{gene}.txt", d_str)
+        out.writestr(f"singleTissueEqtl.{args.version}/{gene}.txt", d_str)

@@ -1,3 +1,19 @@
+# Process sQTL results from tensorQTL for web interface
+#
+# Inputs:
+#   {indir}/geno/alleles.txt.gz
+#   {indir}/ref/GCF_015227675.2_mRatBN7.2_genomic.chr.genes.gtf
+#   {indir}/v3/{tissue}/splice/{tissue}_splice.cis_qtl.txt.gz
+#   {indir}/v3/{tissue}/splice/{tissue}_splice.cis_independent_qtl.txt.gz
+#   {indir}/v3/{tissue}/splice/{tissue}_splice.cis_qtl_signif.txt.gz
+#   {indir}/v3/{tissue}/splice/{tissue}_splice.trans_qtl_pairs.txt.gz
+#
+# Outputs:
+#   {outdir}/splice/top_assoc_splice.v3_rn7.txt
+#   {outdir}/splice/sqtls_indep.v3_rn7.txt
+#   {outdir}/splice/splice.cis_qtl_signif.{tissue}.v3_rn7.txt.gz
+#   {outdir}/splice/splice.trans_qtl_pairs.{tissue}.v3_rn7.txt.gz
+
 suppressPackageStartupMessages(library(tidyverse))
 
 load_tensorqtl <- function(tensorqtl_out) {

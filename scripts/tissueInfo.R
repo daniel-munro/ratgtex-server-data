@@ -1,3 +1,13 @@
+# Generate tissue info table for web interface
+#
+# Inputs:
+#   {indir}/tissue_info.txt
+#   {indir}/v3/{tissueSiteDetailId}/{tissueSiteDetailId}.expr.tpm.bed.gz
+#   {outdir}/eqtl/top_assoc.{v}.txt
+#
+# Outputs:
+#   {outdir}/tissueInfo.{v}.txt
+
 suppressPackageStartupMessages(library(tidyverse))
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -10,15 +20,21 @@ v <- "v3_rn7"
 
 expr <- tibble(tissueSiteDetailId = tissues) |>
     reframe(
-        read_tsv(str_glue("{indir}/{version}/{tissueSiteDetailId}/{tissueSiteDetailId}.expr.tpm.bed.gz"),
-                 col_types = c(`#chr` = "-", start = "-", end = "-",
-                               gene_id = "c", .default = "d")) |>
+        read_tsv(
+            str_glue("{indir}/{version}/{tissueSiteDetailId}/{tissueSiteDetailId}.expr.tpm.bed.gz"),
+            col_types = c(
+                `#chr` = "-", start = "-", end = "-",
+                gene_id = "c", .default = "d"
+            )
+        ) |>
             pivot_longer(-gene_id, names_to = "rat_id", values_to = "tpm") |>
             group_by(gene_id) |>
             filter(sum(tpm > 0) > 1) |> # Genes tested for eQTLs
             ungroup() |>
-            summarise(rnaSeqSampleCount = n_distinct(rat_id),
-                      expressedGeneCount = n_distinct(gene_id)),
+            summarise(
+                rnaSeqSampleCount = n_distinct(rat_id),
+                expressedGeneCount = n_distinct(gene_id)
+            ),
         .by = tissueSiteDetailId
     )
 
@@ -34,7 +50,9 @@ d <- d |>
     left_join(expr, by = "tissueSiteDetailId", relationship = "one-to-one") |>
     mutate(rnaSeqAndGenotypeSampleCount = rnaSeqSampleCount, .after = rnaSeqSampleCount) |>
     left_join(egenes, by = c("tissueSiteDetailId" = "tissue"), relationship = "one-to-one") |>
-    mutate(datasetId = "ratgtex_v1",
-           hasEGenes = "True")
+    mutate(
+        datasetId = "ratgtex_v1",
+        hasEGenes = "True"
+    )
 
 write_tsv(d, str_glue("{outdir}/tissueInfo.{v}.txt"))
