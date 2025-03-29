@@ -1,10 +1,10 @@
 """Assemble all significant cis associations in zip archive of per-gene files
 
 Inputs:
-    {indir}/{version}/{tissue}/{tissue}.cis_qtl_signif.txt.gz
+    {indir}/v3/{tissue}/{tissue}.cis_qtl_signif.txt.gz
 
 Outputs:
-    {outdir}/singleTissueEqtl.{version}.zip
+    {outdir}/singleTissueEqtl.v3.zip
 """
 
 import argparse

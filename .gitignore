@@ -3,3 +3,4 @@ test/
 data
 data_*
 slurm-*.out
+.snakemake

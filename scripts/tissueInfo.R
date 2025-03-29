@@ -3,10 +3,10 @@
 # Inputs:
 #   {indir}/tissue_info.txt
 #   {indir}/v3/{tissueSiteDetailId}/{tissueSiteDetailId}.expr.tpm.bed.gz
-#   {outdir}/eqtl/top_assoc.{v}.txt
+#   {outdir}/eqtl/top_assoc.v3_rn7.txt
 #
 # Outputs:
-#   {outdir}/tissueInfo.{v}.txt
+#   {outdir}/tissueInfo.v3_rn7.txt
 
 suppressPackageStartupMessages(library(tidyverse))
 
@@ -51,8 +51,8 @@ d <- d |>
     mutate(rnaSeqAndGenotypeSampleCount = rnaSeqSampleCount, .after = rnaSeqSampleCount) |>
     left_join(egenes, by = c("tissueSiteDetailId" = "tissue"), relationship = "one-to-one") |>
     mutate(
-        datasetId = "ratgtex_v1",
+        datasetId = str_glue("ratgtex_{version}"),
         hasEGenes = "True"
     )
 
-write_tsv(d, str_glue("{outdir}/tissueInfo.{v}.txt"))
+write_tsv(d, str_glue("{outdir}/tissueInfo.{version}.txt"))

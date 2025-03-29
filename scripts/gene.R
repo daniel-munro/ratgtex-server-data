@@ -6,14 +6,14 @@
 #   {indir}/{version}/{tissue}/{tissue}.cis_qtl_signif.txt.gz
 #   {indir}/{version}/{tissue}/{tissue}.expr.tpm.bed.gz
 #   {indir}/{version}/{tissue}/splice/{tissue}.leafcutter.phenotype_groups.txt
-#   {outdir}/eqtl/eqtls_indep.{v}.txt
-#   {outdir}/eqtl/top_assoc.{v}.txt
-#   {outdir}/splice/sqtls_indep.{v}.txt
-#   {outdir}/splice/top_assoc_splice.{v}.txt
+#   {outdir}/eqtl/eqtls_indep.v3_rn7.txt
+#   {outdir}/eqtl/top_assoc.v3_rn7.txt
+#   {outdir}/splice/sqtls_indep.v3_rn7.txt
+#   {outdir}/splice/top_assoc_splice.v3_rn7.txt
 #
 # Outputs:
-#   {outdir}/autocomplete.{v}.json
-#   {outdir}/gene.{v}.txt
+#   {outdir}/autocomplete.v3_rn7.json
+#   {outdir}/gene.v3_rn7.txt
 
 suppressPackageStartupMessages(library(tidyverse))
 
@@ -165,9 +165,9 @@ genes <- read_tsv(
         description = str_match(etc, 'description "([^"]+)"')[, 2],
         tss = if_else(strand == "+", start, end)
     ) |>
-    select(geneId, chromosome, start, end, strand, tss, description) |>
-    left_join(ensembl_mappings, by = "geneId", relationship = "one-to-one") |>
     replace_na(list(description = "")) |>
+    left_join(ensembl_mappings, by = "geneId", relationship = "one-to-one") |>
+    select(geneId, geneIdEnsembl, chromosome, start, end, strand, tss, description) |>
     mutate(hasEqtl = if_else(geneId %in% signif, "True", "False")) |>
     left_join(is_expr, by = c("geneId" = "gene_id"), relationship = "one-to-one") |>
     left_join(was_tested_eqtl, by = c("geneId" = "gene_id"), relationship = "one-to-one") |>

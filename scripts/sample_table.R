@@ -3,13 +3,13 @@
 # Inputs:
 #   {indir}/geno/genotyping_log.csv
 #   {indir}/samples/{geo_accession}_series_matrix.txt.gz
-#   {indir}/{version}/{tissue}/rat_ids.txt
+#   {indir}/v3/{tissue}/rat_ids.txt
 #
 # Outputs:
-#   {outdir}/ref/RatGTEx_rats.{v}.html
-#   {outdir}/ref/RatGTEx_rats.{v}.tsv
-#   {outdir}/ref/RatGTEx_samples.{v}.html
-#   {outdir}/ref/RatGTEx_samples.{v}.tsv
+#   {outdir}/ref/rats.v3.html
+#   {outdir}/ref/samples.v3.html
+#   {outdir}/ref/RatGTEx_rats.v3.tsv
+#   {outdir}/ref/RatGTEx_samples.v3.tsv
 
 suppressPackageStartupMessages(library(tidyverse))
 
@@ -60,18 +60,18 @@ outdir <- args[2]
 tissues <- args[3:length(args)]
 
 version <- "v3"
-v <- "v3_rn7"
 
 accession <- c(
     Eye = "GSE201236",
     IL = "GSE173137",
     LHb = "GSE173138",
-    NAcc = "GSE173136",
+    NAcc1 = "GSE173136",
     OFC = "GSE173140",
-    PL = "GSE173139"
+    PL1 = "GSE173139"
 )
-to_trim <- c("IL", "LHb", "NAcc", "OFC", "PL") # IDs have tissue appended to rat ID
+to_trim <- c("IL", "LHb", "NAcc1", "OFC", "PL1") # IDs have tissue appended to rat ID
 
+stopifnot(any(tissues %in% names(accession)))
 geo <- tibble(tissue = tissues) |>
     filter(tissue %in% names(accession)) |>
     reframe(
@@ -98,6 +98,9 @@ meta <- read_csv(
     col_types = cols(rfid = "c", sex = "c", coatcolor = "c", .default = "-")
 ) |>
     rename(rat_id = rfid) |>
+    group_by(rat_id) |>
+    slice_tail(n = 1) |> # genotyping log can have multiple rows for same rat_id, e.g. concatenated logs from multiple genotyping rounds
+    ungroup() |>
     mutate(
         coatcolor = coatcolor |> # Collapse equivalent labels
             str_to_upper() |>
@@ -117,9 +120,9 @@ rats_adi_liv <- samples |>
 rats <- rats |>
     mutate(sex = if_else(is.na(sex) & rat_id %in% rats_adi_liv, "M", sex))
 
-write_tsv(samples, str_glue("{outdir}/ref/RatGTEx_samples.{v}.tsv"))
+write_tsv(samples, str_glue("{outdir}/ref/RatGTEx_samples.{version}.tsv"))
 
-write_tsv(rats, str_glue("{outdir}/ref/RatGTEx_rats.{v}.tsv"))
+write_tsv(rats, str_glue("{outdir}/ref/RatGTEx_rats.{version}.tsv"))
 
 ###################
 ## Write to HTML ##
@@ -127,7 +130,7 @@ write_tsv(rats, str_glue("{outdir}/ref/RatGTEx_rats.{v}.tsv"))
 # Copy and paste these files' contents into about/samples/index.html.
 
 html_sam <- '<table id="sample-table"><thead><tr><th>Rat ID</th><th>Tissue</th><th>GEO Accession</th><th>BioSample Accession</th><th>SRA Accession</th></tr></thead><tbody>'
-for (r in 1:nrow(samples)) {
+for (r in seq_len(nrow(samples))) {
     html_sam <- html_sam |> str_c(str_glue('<tr><td>{samples$rat_id[r]}</td><td>{samples$tissue[r]}</td>'))
     html_sam <- html_sam |> str_c(if (is.na(samples$GEO_accession[r])) {
         '<td>-</td>'
@@ -147,10 +150,10 @@ for (r in 1:nrow(samples)) {
 }
 html_sam <- html_sam |> str_c('</tbody></table>\n')
 
-write_file(html_sam, str_glue("{outdir}/ref/RatGTEx_samples.{v}.html"))
+write_file(html_sam, str_glue("{outdir}/ref/samples.{version}.html"))
 
 html_rat <- '<table id="rat-table"><thead><tr><th>Rat ID</th><th>Sex</th><th>Coat Color</th><th>Tissues</th></tr></thead><tbody>'
-for (r in 1:nrow(rats)) {
+for (r in seq_len(nrow(rats))) {
     id <- rats$rat_id[r]
     html_rat <- html_rat |> str_c(str_glue('<tr><td>{id}</td>'))
     html_rat <- html_rat |> str_c(if (is.na(rats$sex[r])) {
@@ -176,4 +179,4 @@ for (r in 1:nrow(rats)) {
 }
 html_rat <- html_rat |> str_c('</tbody></table>\n')
 
-write_file(html_rat, str_glue("{outdir}/ref/RatGTEx_rats.{v}.html"))
+write_file(html_rat, str_glue("{outdir}/ref/rats.{version}.html"))

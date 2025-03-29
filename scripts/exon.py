@@ -23,7 +23,6 @@ d = d.rename(
         'exon_number': 'exonNumber',
         'feature': 'featureType',
         'gene_id': 'geneId',
-        'gene_name': 'geneSymbol',
         'transcript_id': 'transcriptId',
     }
 )
@@ -35,7 +34,6 @@ d = d[
         'exonNumber',
         'featureType',
         'geneId',
-        'geneSymbol',
         'start',
         'strand',
         'transcriptId',

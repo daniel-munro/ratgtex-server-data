@@ -1,12 +1,12 @@
 # Calculate median gene expression for web interface
 #
 # Inputs:
-#   {indir}/{version}/{tissue}/{tissue}.expr.tpm.bed.gz
-#   {outdir}/gene.{v}.txt
+#   {indir}/v3/{tissue}/{tissue}.expr.tpm.bed.gz
+#   {outdir}/gene.v3_rn7.txt
 #
 # Outputs:
-#   {outdir}/medianGeneExpression.{v}.txt.gz
-#   {outdir}/topExpressedGene.{v}.txt
+#   {outdir}/medianGeneExpression.v3_rn7.txt.gz
+#   {outdir}/topExpressedGene.v3_rn7.txt
 
 suppressPackageStartupMessages(library(tidyverse))
 
