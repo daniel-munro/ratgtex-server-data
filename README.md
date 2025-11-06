@@ -4,7 +4,7 @@ Process RatGTEx pipeline results into data files for the RatGTEx site
 Once the [RatGTEx pipeline](https://github.com/daniel-munro/ratgtex-pipeline) is run for all tissues, this code processes the results and assembles them into data files for [ratgtex.org](https://ratgtex.org).
 Many of them are put into a convenient format to be used by the [API](github.com/daniel-munro/ratgtex), which is used mainly for the data visualizations.
 Others are provided for download.
-This code is designed to run only the latest RatGTEx data version, but files are still labeled with RatGTEx version and genome version for clarity.
+This code is designed to run only the latest RatGTEx data version, but files are still labeled with RatGTEx version, and sometimes genome version, for clarity.
 
 ## Inputs (in specified input directory):
 
@@ -32,27 +32,27 @@ This code is designed to run only the latest RatGTEx data version, but files are
 
 ## Outputs (in specified output directory):
 
-- `geno/{geno_dataset}.v3_rn7.vcf.gz{,.tbi}`
-- `autocomplete.v3_rn7.json`
-- `exon.v3_rn7.txt`
-- `gene.v3_rn7.txt`
-- `medianGeneExpression.v3_rn7.txt.gz`
-- `singleTissueEqtl.v3_rn7.zip`
-- `tissueInfo.v3_rn7.txt`
-- `topExpressedGene.v3_rn7.txt`
-- `cis_pvals/{tissue}.v3_rn7.zip`
-- `covar/covar.{tissue}.v3_rn7.txt`
+- `geno/{geno_dataset}.rn7.vcf.gz{,.tbi}`
+- `autocomplete.v3.json`
+- `exon.v3.txt`
+- `gene.v3.txt`
+- `medianGeneExpression.v3.txt.gz`
+- `singleTissueEqtl.v3.zip`
+- `tissueInfo.v3.txt`
+- `topExpressedGene.v3.txt`
+- `cis_pvals/{tissue}.v3.zip`
+- `covar/covar.{tissue}.v3.txt`
 - `eqtl/eqtls_indep.v3_rn7.txt`
 - `eqtl/top_assoc.v3_rn7.txt`
 - `eqtl/cis_qtl_signif.{tissue}.v3_rn7.txt.gz`
 - `eqtl/trans_qtl_pairs.{tissue}.v3_rn7.txt.gz`
-- `expr/expr.{iqn,log2,tpm}.{tissue}.v3_rn7.bed.gz`
-- `fastq_map/fastq_map.{tissue}.v3_rn7.txt`
-- `rat_ids/rat_ids.{tissue}.v3_rn7.txt`
-- `ref/RatGTEx_rats.v3_rn7.tsv`
-- `ref/RatGTEx_samples.v3_rn7.tsv`
-- `ref/rats.v3_rn7.html`: Jekyll will insert this HTML table into the About Samples page.
-- `ref/samples.v3_rn7.html`: Jekyll will insert this HTML table into the About Samples page.
+- `expr/expr.{iqn,iqn.filtered,log2,tpm}.{tissue}.v3_rn7.bed.gz`
+- `fastq_map/fastq_map.{tissue}.v3.txt`
+- `rat_ids/rat_ids.{tissue}.v3.txt`
+- `ref/RatGTEx_rats.v3.tsv`
+- `ref/RatGTEx_samples.v3.tsv`
+- `ref/rats.v3.html`: Jekyll will insert this HTML table into the About Samples page.
+- `ref/samples.v3.html`: Jekyll will insert this HTML table into the About Samples page.
 - `splice/top_assoc_splice.v3_rn7.txt`
 - `splice/sqtls_indep.v3_rn7.txt`
 - `splice/leafcutter.{tissue}.v3_rn7.bed.gz"`
@@ -62,18 +62,13 @@ This code is designed to run only the latest RatGTEx data version, but files are
 
 ## Requirements
 
+- snakemake
 - pandas (Python)
 - gtfparse (Python)
 - tidyverse (R)
 
 ## Usage
 
-Run `check_inputs.py` to check if all necessary input files exist. If so, run `run.py`, which calls R and Python scripts that prepare the server data. The parameters are:
+Run [Snakemake](https://snakemake.github.io) to generate the output files. Edit the Snakefile as needed to change which files are produced. It is recommended to first run as a dry run (with `-n`) to ensure it will run the steps you expect it to.
 
-1. Path to the RatGTEx pipeline base directory
-2. Output directory path
-
-Then, do these additional steps:
-
-1. Run `check_outputs.py` to check if all necessary files have been created/copied.
-2. `{outdir}/studies/{tissues}/` contain data directly used in the original publications, which may or may not differ from the data from the unified RatGTEx pipeline. These aren't used in the portal except to be available for download. Copy any files to this location and add links to them on the original study data page.
+`{outdir}/studies/{tissues}/` contain data directly used in the original publications, which may or may not differ from the data from the unified RatGTEx pipeline. These aren't used in the portal except to be available for download. Copy any files to this location and add links to them on the original study data page.

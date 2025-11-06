@@ -2,11 +2,11 @@
 #
 # Inputs:
 #   {indir}/v3/{tissue}/{tissue}.expr.tpm.bed.gz
-#   {outdir}/gene.v3_rn7.txt
+#   {outdir}/gene.v3.txt
 #
 # Outputs:
-#   {outdir}/medianGeneExpression.v3_rn7.txt.gz
-#   {outdir}/topExpressedGene.v3_rn7.txt
+#   {outdir}/medianGeneExpression.v3.txt.gz
+#   {outdir}/topExpressedGene.v3.txt
 
 suppressPackageStartupMessages(library(tidyverse))
 
@@ -16,9 +16,8 @@ outdir <- args[2]
 tissues <- args[3:length(args)]
 
 version <- "v3"
-v <- "v3_rn7"
 
-chroms <- read_tsv(str_glue("{outdir}/gene.{v}.txt"),
+chroms <- read_tsv(str_glue("{outdir}/gene.{version}.txt"),
     col_types = cols(geneId = "c", chromosome = "c", .default = "-")
 )
 
@@ -39,7 +38,7 @@ med <- expr |>
 
 med |>
     pivot_wider(names_from = tissueSiteDetailId, values_from = median) |>
-    write_tsv(str_glue("{outdir}/medianGeneExpression.{v}.txt.gz"))
+    write_tsv(str_glue("{outdir}/medianGeneExpression.{version}.txt.gz"))
 
 top <- med |>
     filter(geneId %in% chroms$geneId) |>
@@ -53,4 +52,4 @@ top <- med |>
     mutate(datasetId = str_glue("ratgtex_{version}"),
            unit = "TPM")
 
-write_tsv(top, str_glue("{outdir}/topExpressedGene.{v}.txt"))
+write_tsv(top, str_glue("{outdir}/topExpressedGene.{version}.txt"))

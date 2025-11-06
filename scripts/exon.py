@@ -26,6 +26,8 @@ d = d.rename(
         'transcript_id': 'transcriptId',
     }
 )
+# Fill empty transcriptId with geneId
+d.loc[d['transcriptId'] == '', 'transcriptId'] = d.loc[d['transcriptId'] == '', 'geneId']
 d = d[
     [
         'chromosome',
