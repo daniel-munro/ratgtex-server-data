@@ -8,7 +8,7 @@ This code is designed to run only the latest RatGTEx data version, but files are
 
 ## Inputs (in specified input directory):
 
-- `tissue_info.txt`: Tab-delimited table of basic information about each tissue, e.g. full name and color to use in website visualizations.
+- `tissue_info.tsv`: Tab-delimited table of basic information about each tissue, e.g. full name and color to use in website visualizations.
 - `geno/{geno_dataset}.vcf.gz{,.tbi}`: Genotype files, each including the individuals for one or more tissues.
 - `geno/alleles.txt.gz`: Three-column tab-delimited file with variant ID, REF, and ALT alleles for the union of SNPs extracted from the genotype VCF files.
 - `geno/genotyping_log.csv`: CSV metadata file containing sex and coat color info to add to the rat info table.

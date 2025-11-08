@@ -1,10 +1,10 @@
 """Assemble all significant cis associations in zip archive of per-gene files
 
 Inputs:
-    {indir}/v3/{tissue}/{tissue}.cis_qtl_signif.txt.gz
+    {indir}/v4/{tissue}/{tissue}.cis_qtl_signif.txt.gz
 
 Outputs:
-    {outdir}/singleTissueEqtl.v3.zip
+    {outdir}/singleTissueEqtl.v4.zip
 """
 
 import argparse
@@ -18,7 +18,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "indir", type=Path, help="Path to the RatGTEx pipeline base directory"
 )
-parser.add_argument("version", type=str, help="e.g. v3")
+parser.add_argument("version", type=str, help="e.g. v4")
 parser.add_argument("outdir", type=Path, help="Output directory path")
 parser.add_argument("tissues", nargs="+", type=str, help="Tissues to include")
 args = parser.parse_args()
