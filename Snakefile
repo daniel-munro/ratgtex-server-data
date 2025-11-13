@@ -27,12 +27,12 @@ localrules:
 
 rule all:
     input:
-        "data/tissueInfo.v4.txt",
+        "data/tissue_info.v4.tsv",
         ##
-        "data/gene.v4.txt",
+        "data/gene.v4.tsv",
         "data/autocomplete.v4.json",
         ##
-        "data/exon.v4.txt",
+        "data/exon.v4.tsv",
         ##
         "data/ref/RatGTEx_rats.v4.tsv",
         "data/ref/RatGTEx_samples.v4.tsv",
@@ -47,18 +47,21 @@ rule all:
         ##
         expand("data/expr/expr.{units}.{tissue}.v4_rn8.bed.gz", units=["log2", "tpm"], tissue=tissues_merged),
         ##
-        "data/medianGeneExpression.v4.txt.gz",
-        "data/topExpressedGene.v4.txt",
+        "data/expr/medianGeneExpression.v4.tsv.gz",
+        "data/expr/topExpressedGene.v4.tsv",
         ##
         expand("data/phenos/phenos.{tissue}.{modality}.{norm}.v4_rn8.bed.gz", tissue=tissues_merged, modality=modalities, norm=["unnorm", "norm"]),
         ##
-        "data/eqtl/top_assoc.v4_rn8.txt",
-        "data/eqtl/eqtls_indep.v4_rn8.txt",
+        "data/eqtl/top_assoc.v4_rn8.tsv",
+        "data/eqtl/eqtls_indep.v4_rn8.tsv",
         ##
-        expand("data/eqtl/cis_qtl_signif.{tissue}.v4_rn8.txt.gz", tissue=tissues_merged),
-        expand("data/eqtl/trans_qtl_pairs.{tissue}.v4_rn8.txt.gz", tissue=tissues_merged),
+        "data/eqtl/singleTissueEqtl.v4.zip",
         ##
-        "data/singleTissueEqtl.v4.zip",
+        expand("data/xqtl/top_assoc.{modality}.v4_rn8.tsv", modality=modalities + ["cross_modality"]),
+        expand("data/xqtl/xqtls_indep.{modality}.v4_rn8.tsv", modality=modalities + ["cross_modality"]),
+        ##
+        expand("data/xqtl/cis_qtl_signif.{tissue}.{modality}.v4_rn8.txt.gz", tissue=tissues_merged, modality=modalities),
+        expand("data/xqtl/trans_qtl_pairs.{tissue}.expression.v4_rn8.txt.gz", tissue=tissues_merged),
         ##
         expand("data/cis_pvals/{tissue}.v4.zip", tissue=tissues_merged),
 
@@ -88,11 +91,11 @@ rule tissue_info:
         expr = expand("../ratgtex/v4/{tissue}/phenos/output/expression.bed.gz", tissue=tissues_merged),
         eqtl = "data/eqtl/top_assoc.v4_rn8.txt",
     output:
-        info = "data/tissueInfo.v4.txt"
+        info = "data/tissue_info.v4.tsv"
     params:
         tissues = tissues_merged
     shell:
-        "Rscript scripts/tissueInfo.R ../ratgtex data {params.tissues}"
+        "Rscript scripts/tissue_info.R ../ratgtex data {params.tissues}"
 
 rule gene_info:
     """Process gene info table"""
@@ -103,7 +106,7 @@ rule gene_info:
         eqtl = "data/eqtl/eqtls_indep.v4_rn8.txt",
         expr_assoc = "data/eqtl/top_assoc.v4_rn8.txt",
     output:
-        gene = "data/gene.v4.txt",
+        gene = "data/gene.v4.tsv",
         autocomplete = "data/autocomplete.v4.json",
     params:
         tissues = tissues_merged
@@ -115,7 +118,7 @@ rule exon_table:
     input:
         gtf = "../ratgtex/ref/GCF_036323735.1_GRCr8_genomic.chr.genes.gtf"
     output:
-        exon = "data/exon.v4.txt"
+        exon = "data/exon.v4.tsv"
     shell:
         "python3 scripts/exon.py {input.gtf} {output.exon}"
 
@@ -195,10 +198,10 @@ rule median_gene_expression:
     """Calculate median gene expression for web interface"""
     input:
         expr = expand("data/expr/expr.tpm.{tissue}.v4_rn8.bed.gz", tissue=tissues_merged),
-        genes = "data/gene.v4.txt",
+        genes = "data/gene.v4.tsv",
     output:
-        median = "data/medianGeneExpression.v4.txt.gz",
-        top = "data/topExpressedGene.v4.txt",
+        median = "data/expr/medianGeneExpression.v4.tsv.gz",
+        top = "data/expr/topExpressedGene.v4.tsv",
     params:
         tissues = tissues_merged,
     shell:
@@ -244,26 +247,57 @@ rule eqtl_combined_files:
     shell:
         "Rscript scripts/eqtl_combined_files.R ../ratgtex data {params.tissues}"
 
-rule eqtl_tissue_files:
-    """Process eQTL results for one tissue"""
+rule xqtl_combined_files:
+    """Process and aggregate xQTL results from tensorQTL"""
     input:
-        gtf = "../ratgtex/ref/GCF_036323735.1_GRCr8_genomic.chr.gtf",
-        cis_qtl_signif = "../ratgtex/v4/{tissue}/{tissue}.cis_qtl_signif.txt.gz",
-        trans_qtl_pairs = "../ratgtex/v4/{tissue}/{tissue}.trans_qtl_pairs.txt.gz",        
+        alleles = "../ratgtex/geno/alleles.txt.gz",
+        genes = "data/gene.v4.tsv",
+        cis_indep = expand("../ratgtex/v4/{tissue}/pheast/output/qtl/{{modality}}.cis_independent_qtl.txt.gz", tissue=tissues_merged),
+        cis_qtl = expand("../ratgtex/v4/{tissue}/pheast/output/qtl/{{modality}}.cis_qtl.txt.gz", tissue=tissues_merged),
     output:
-        cis_qtl_signif = "data/eqtl/cis_qtl_signif.{tissue}.v4_rn8.txt.gz",
-        trans_qtl_pairs = "data/eqtl/trans_qtl_pairs.{tissue}.v4_rn8.txt.gz"
+        top_assoc = "data/xqtl/top_assoc.{modality}.v4_rn8.txt",
+        eqtls_indep = "data/xqtl/xqtls_indep.{modality}.v4_rn8.txt",
+    params:
+        tissues = tissues_merged,
     resources:
         mem_mb = 32000,
     shell:
-        "Rscript scripts/eqtl_tissue_files.R ../ratgtex data {wildcards.tissue}"
+        "Rscript scripts/xqtl_combined_files.R ../ratgtex data {wildcards.modality} {params.tissues}"
+
+rule xqtl_signif_files:
+    """Process all significant cis-xQTL pair file for one tissue"""
+    input:
+        signif = "../ratgtex/v4/{tissue}/{tissue}.{modality}.cis_qtl_signif.txt.gz",
+        genes = "data/gene.v4.tsv",
+    output:
+        signif = "data/xqtl/cis_qtl_signif.{tissue}.{modality}.v4_rn8.txt.gz",
+    resources:
+        mem_mb = 32000,
+    shell:
+        "Rscript scripts/cis_qtl_signif.R {input.signif} {input.genes} {output.signif}"
+
+rule xqtl_trans_files:
+    """Process eQTL results for one tissue"""
+    input:
+        trans_qtl_pairs = "../ratgtex/v4/{tissue}/{tissue}.{modality}.trans_qtl_pairs.txt.gz",        
+    output:
+        trans_qtl_pairs = "data/xqtl/trans_qtl_pairs.{tissue}.{modality}.v4_rn8.txt.gz"
+    resources:
+        mem_mb = 32000,
+    shell:
+        """
+        zcat {input.trans_qtl_pairs} | \
+            sed '1s/\\bb\\b/slope/g; 1s/\\bb_se\\b/slope_se/g' | \
+            gzip -c \
+            > {output.trans_qtl_pairs}
+        """
 
 rule all_signif_eqtl:
     """Assemble all significant cis associations in zip archive of per-gene files"""
     input:
-        signif = expand("../ratgtex/v4/{tissue}/{tissue}.cis_qtl_signif.txt.gz", tissue=tissues_merged),
+        signif = expand("../ratgtex/v4/{tissue}/{tissue}.expression.cis_qtl_signif.txt.gz", tissue=tissues_merged),
     output:
-        zip = "data/singleTissueEqtl.v4.zip"
+        zip = "data/eqtl/singleTissueEqtl.v4.zip"
     params:
         tissues = tissues_merged,
     resources:

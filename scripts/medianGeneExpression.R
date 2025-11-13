@@ -9,11 +9,11 @@ tissues <- args[3:length(args)]
 
 version <- "v4"
 
-input_gene <- str_glue("{outdir}/gene.{version}.txt")
+input_gene <- str_glue("{outdir}/gene.{version}.tsv")
 input_expr_template <- "{outdir}/expr/expr.tpm.{tissue}.{version}_rn8.bed.gz"
 
-output_median <- str_glue("{outdir}/medianGeneExpression.{version}.txt.gz")
-output_top <- str_glue("{outdir}/topExpressedGene.{version}.txt")
+output_median <- str_glue("{outdir}/expr/medianGeneExpression.{version}.tsv.gz")
+output_top <- str_glue("{outdir}/expr/topExpressedGene.{version}.tsv")
 chroms <- read_tsv(
   input_gene,
   col_types = cols(geneId = "c", chromosome = "c", .default = "-")

@@ -19,7 +19,7 @@ parser.add_argument(
     "indir", type=Path, help="Path to the RatGTEx pipeline base directory"
 )
 parser.add_argument("version", type=str, help="e.g. v4")
-parser.add_argument("outdir", type=Path, help="Output directory path")
+parser.add_argument("outdir", type=Path, help="Output directory path for all server data")
 parser.add_argument("tissues", nargs="+", type=str, help="Tissues to include")
 args = parser.parse_args()
 
@@ -41,7 +41,7 @@ for tissue in args.tissues:
 
 sig = pd.concat(sig)
 
-outfile = args.outdir / f"singleTissueEqtl.{args.version}.zip"
+outfile = args.outdir / "eqtl" / f"singleTissueEqtl.{args.version}.zip"
 with zipfile.ZipFile(outfile, 'w', zipfile.ZIP_DEFLATED) as out:
     for gene, d in sig.groupby("phenotype_id"):
         d = d.drop(columns=["phenotype_id"])

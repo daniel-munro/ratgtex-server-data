@@ -13,7 +13,7 @@ input_tissue <- str_glue("{indir}/tissue_info.tsv")
 input_expr_template <- "{indir}/{version}/{tissue}/phenos/output/expression.bed.gz"
 input_assoc <- str_glue("{outdir}/eqtl/top_assoc.{version}_rn8.txt")
 
-output <- str_glue("{outdir}/tissueInfo.{version}.txt")
+output <- str_glue("{outdir}/tissue_info.{version}.tsv")
 
 samples <- tibble(tissue = tissues) |>
   reframe(

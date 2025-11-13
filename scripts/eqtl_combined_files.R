@@ -40,8 +40,8 @@ input_afc_template <- "{indir}/v4/{tissue}/{tissue}.aFC.txt"
 input_eqtl_assoc_template <- "{indir}/v4/{tissue}/pheast/output/qtl/expression.cis_qtl.txt.gz"
 input_eqtl_indep_template <- "{indir}/v4/{tissue}/pheast/output/qtl/expression.cis_independent_qtl.txt.gz"
 
-output_assoc <- str_glue("{outdir}/eqtl/top_assoc.v4_rn8.txt")
-output_indep <- str_glue("{outdir}/eqtl/eqtls_indep.v4_rn8.txt")
+output_assoc <- str_glue("{outdir}/eqtl/top_assoc.v4_rn8.tsv")
+output_indep <- str_glue("{outdir}/eqtl/eqtls_indep.v4_rn8.tsv")
 
 genes <- read_tsv(input_anno,
   col_types = "--cii-c-c",

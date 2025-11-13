@@ -4,7 +4,7 @@ from pathlib import Path
 
 parser = argparse.ArgumentParser(description='Prepare exon annotations for server API')
 parser.add_argument('input', type=Path, help='GTF gene annotation file')
-parser.add_argument('output', type=Path, help='Output file name (TXT/TSV)')
+parser.add_argument('output', type=Path, help='Output file name (TSV)')
 args = parser.parse_args()
 
 d = read_gtf(args.input)

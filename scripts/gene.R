@@ -10,10 +10,10 @@ tissues <- args[3:length(args)]
 input_anno <- str_glue("{indir}/ref/GCF_036323735.1_GRCr8_genomic.chr.gtf")
 input_signif_template <- "{indir}/v4/{tissue}/{tissue}.cis_qtl_signif.txt.gz"
 input_expr_template <- "{indir}/v4/{tissue}/phenos/output/expression.bed.gz"
-input_eqtl_indep <- str_glue("{outdir}/eqtl/eqtls_indep.v4_rn8.txt")
-input_top_assoc <- str_glue("{outdir}/eqtl/top_assoc.v4_rn8.txt")
+input_eqtl_indep <- str_glue("{outdir}/eqtl/eqtls_indep.v4_rn8.tsv")
+input_top_assoc <- str_glue("{outdir}/eqtl/top_assoc.v4_rn8.tsv")
 
-output_gene <- str_glue("{outdir}/gene.v4.txt")
+output_gene <- str_glue("{outdir}/gene.v4.tsv")
 output_autocomplete <- str_glue("{outdir}/autocomplete.v4.json")
 
 genes <- read_tsv(
