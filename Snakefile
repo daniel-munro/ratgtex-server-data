@@ -314,35 +314,3 @@ rule cis_pvals:
         zip = "data/cis_pvals/{tissue}.v4.zip"
     shell:
         "python3 scripts/all_cis_pvals.py ../ratgtex v4 data {wildcards.tissue}"
-
-# rule sqtl_combined_files:
-#     """Process sQTL results from tensorQTL for web interface"""
-#     input:
-#         alleles = "../ratgtex/geno/alleles.txt.gz",
-#         gtf = "../ratgtex/ref/GCF_015227675.2_mRatBN7.2_genomic.chr.genes.gtf",
-#         cis_qtl = expand("../ratgtex/v3/{tissue}/splice/{tissue}_splice.cis_qtl.txt.gz", tissue=tissues_merged),
-#         cis_indep = expand("../ratgtex/v3/{tissue}/splice/{tissue}_splice.cis_independent_qtl.txt.gz", tissue=tissues_merged),
-#     output:
-#         top_assoc = "data/splice/top_assoc_splice.v3_rn7.txt",
-#         sqtls_indep = "data/splice/sqtls_indep.v3_rn7.txt",
-#     params:
-#         tissues = tissues_merged,
-#     resources:
-#         mem_mb = 32000,
-#     shell:
-#         "Rscript scripts/sqtl_combined_files.R ../ratgtex data {params.tissues}"
-
-# rule sqtl_tissue_files:
-#     """Process sQTL results for one tissue"""
-#     input:
-#         gtf = "../ratgtex/ref/GCF_015227675.2_mRatBN7.2_genomic.chr.genes.gtf",
-#         cis_qtl_signif = "../ratgtex/v3/{tissue}/splice/{tissue}_splice.cis_qtl_signif.txt.gz",
-#         trans_qtl_pairs = "../ratgtex/v3/{tissue}/splice/{tissue}_splice.trans_qtl_pairs.txt.gz",
-#     output:
-#         cis_qtl_signif = "data/splice/splice.cis_qtl_signif.{tissue}.v3_rn7.txt.gz",
-#         trans_qtl_pairs = "data/splice/splice.trans_qtl_pairs.{tissue}.v3_rn7.txt.gz"
-#     resources:
-#         mem_mb = 32000,
-#     shell:
-#         "Rscript scripts/sqtl_tissue_files.R ../ratgtex data {wildcards.tissue}"
-

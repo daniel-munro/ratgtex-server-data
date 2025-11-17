@@ -1,4 +1,5 @@
 # ratgtex-server-data
+
 Process RatGTEx pipeline results into data files for the RatGTEx site
 
 Once the [RatGTEx pipeline](https://github.com/daniel-munro/ratgtex-pipeline) is run for all tissues, this code processes the results and assembles them into data files for [ratgtex.org](https://ratgtex.org).
@@ -13,52 +14,48 @@ This code is designed to run only the latest RatGTEx data version, but files are
 - `geno/alleles.txt.gz`: Three-column tab-delimited file with variant ID, REF, and ALT alleles for the union of SNPs extracted from the genotype VCF files.
 - `geno/genotyping_log.csv`: CSV metadata file containing sex and coat color info to add to the rat info table.
 - `samples/{accession}_series_matrix.txt.gz`: GEO series metadata for each tissue whose RNA-Seq data has been added to GEO. When a tissue is added to GEO, download this file for the series (not the superseries in case of multitissue datasets) and add the accession to `sample_table.R`.
-- `ref/GCF_015227675.2_mRatBN7.2_genomic.chr.genes.gtf`
-- `v3/{tissue}/covar.txt`
-- `v3/{tissue}/fastq_map.txt`
-- `v3/{tissue}/rat_ids.txt`
-- `v3/{tissue}/{tissue}.aFC.txt`
-- `v3/{tissue}/{tissue}.cis_independent_qtl.txt.gz`
-- `v3/{tissue}/{tissue}.cis_qtl_all_pvals.txt.gz`
-- `v3/{tissue}/{tissue}.cis_qtl_signif.txt.gz`
-- `v3/{tissue}/{tissue}.cis_qtl.txt.gz`
-- `v3/{tissue}/{tissue}.expr.{iqn,log2,tpm}.bed.gz`
-- `v3/{tissue}/{tissue}.trans_qtl_pairs.txt.gz`
-- `v3/{tissue}/splice/{tissue}.leafcutter.bed.gz`
-- `v3/{tissue}/splice/{tissue}.covar_splice.txt`
-- `v3/{tissue}/splice/{tissue}_splice.cis_qtl.txt.gz`
-- `v3/{tissue}/splice/{tissue}_splice.cis_independent_qtl.txt.gz`
-- `v3/{tissue}/splice/{tissue}_splice.trans_qtl_pairs.txt.gz`
+- `ref/GCF_036323735.1_GRCr8_genomic.chr.gtf`
+- `ref/GCF_036323735.1_GRCr8_genomic.chr.genes.gtf`
+- `v4/{tissue}/fastq_map.txt`
+- `v4/{tissue}/rat_ids.txt`
+- `v4/{tissue}/{tissue}.aFC.txt`
+- `v4/{tissue}/{tissue}.cis_qtl_all_pvals.txt.gz`
+- `v4/{tissue}/{tissue}.{modality}.cis_qtl_signif.txt.gz`
+- `v4/{tissue}/{tissue}.expr.log2.bed.gz`
+- `v4/{tissue}/{tissue}.expression.trans_qtl_pairs.txt.gz`
+- `v4/{tissue}/phenos/output/{modality}.bed.gz`
+- `v4/{tissue}/phenos/output/unnorm/{modality}.bed`
+- `v4/{tissue}/pheast/intermediate/covar/{modality}.covar.tsv`
+- `v4/{tissue}/pheast/output/qtl/{modality}.cis_independent_qtl.txt.gz`
+- `v4/{tissue}/pheast/output/qtl/{modality}.cis_qtl.txt.gz`
 
 ## Outputs (in specified output directory):
 
-- `geno/{geno_dataset}.rn7.vcf.gz{,.tbi}`
-- `autocomplete.v3.json`
-- `exon.v3.txt`
-- `gene.v3.txt`
-- `medianGeneExpression.v3.txt.gz`
-- `singleTissueEqtl.v3.zip`
-- `tissueInfo.v3.txt`
-- `topExpressedGene.v3.txt`
-- `cis_pvals/{tissue}.v3.zip`
-- `covar/covar.{tissue}.v3.txt`
-- `eqtl/eqtls_indep.v3_rn7.txt`
-- `eqtl/top_assoc.v3_rn7.txt`
-- `eqtl/cis_qtl_signif.{tissue}.v3_rn7.txt.gz`
-- `eqtl/trans_qtl_pairs.{tissue}.v3_rn7.txt.gz`
-- `expr/expr.{iqn,iqn.filtered,log2,tpm}.{tissue}.v3_rn7.bed.gz`
-- `fastq_map/fastq_map.{tissue}.v3.txt`
-- `rat_ids/rat_ids.{tissue}.v3.txt`
-- `ref/RatGTEx_rats.v3.tsv`
-- `ref/RatGTEx_samples.v3.tsv`
-- `ref/rats.v3.html`: Jekyll will insert this HTML table into the About Samples page.
-- `ref/samples.v3.html`: Jekyll will insert this HTML table into the About Samples page.
-- `splice/top_assoc_splice.v3_rn7.txt`
-- `splice/sqtls_indep.v3_rn7.txt`
-- `splice/leafcutter.{tissue}.v3_rn7.bed.gz"`
-- `splice/covar_splice.{tissue}.v3_rn7.txt`
-- `splice/splice.cis_qtl_signif.{tissue}.v3_rn7.txt.gz`
-- `splice/splice.trans_qtl_pairs.{tissue}.v3_rn7.txt.gz`
+- `geno/{geno_dataset}.rn8.vcf.gz{,.tbi}`
+- `autocomplete.v4.json`
+- `exon.v4.tsv`
+- `gene.v4.tsv`
+- `medianGeneExpression.v4.tsv.gz`
+- `singleTissueEqtl.v4.zip`
+- `tissue_info.v4.tsv`
+- `topExpressedGene.v4.tsv`
+- `cis_pvals/{tissue}.v4.zip`
+- `covar/covar.{tissue}.{modality}.v4.tsv`
+- `eqtl/eqtls_indep.v4_rn8.tsv`
+- `eqtl/top_assoc.v4_rn8.tsv`
+- `expr/expr.{log2,tpm}.{tissue}.v4_rn8.bed.gz`
+- `fastq_map/fastq_map.{tissue}.v4.txt`
+- `phenos/phenos.{tissue}.{modality}.norm.v4_rn8.bed.gz`
+- `phenos/phenos.{tissue}.{modality}.unnorm.v4_rn8.bed.gz`
+- `rat_ids/rat_ids.{tissue}.v4.txt`
+- `ref/RatGTEx_rats.v4.tsv`
+- `ref/RatGTEx_samples.v4.tsv`
+- `ref/rats.v4.html`: Jekyll will insert this HTML table into the About Samples page.
+- `ref/samples.v4.html`: Jekyll will insert this HTML table into the About Samples page.
+- `xqtl/cis_qtl_signif.{tissue}.{modality}.v4_rn8.txt.gz`
+- `xqtl/top_assoc.{modality}.v4_rn8.tsv`
+- `xqtl/trans_qtl_pairs.{tissue}.expression.v4_rn8.txt.gz`
+- `xqtl/xqtls_indep.{modality}.v4_rn8.tsv`
 
 ## Requirements
 
