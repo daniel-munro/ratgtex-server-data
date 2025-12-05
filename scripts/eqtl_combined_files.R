@@ -35,8 +35,8 @@ outdir <- args[2]
 tissues <- args[3:length(args)]
 
 input_anno <- str_glue("{indir}/ref/GCF_036323735.1_GRCr8_genomic.chr.gtf")
-input_alleles <- str_glue("{indir}/geno/alleles.txt.gz")
-input_afc_template <- "{indir}/v4/{tissue}/{tissue}.aFC.txt"
+input_alleles <- str_glue("{indir}/geno/alleles.tsv.gz")
+input_afc_template <- "{indir}/v4/{tissue}/{tissue}.aFC.tsv"
 input_eqtl_assoc_template <- "{indir}/v4/{tissue}/pheast/output/qtl/expression.cis_qtl.txt.gz"
 input_eqtl_indep_template <- "{indir}/v4/{tissue}/pheast/output/qtl/expression.cis_independent_qtl.txt.gz"
 

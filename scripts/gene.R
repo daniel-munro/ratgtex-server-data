@@ -8,7 +8,7 @@ outdir <- args[2]
 tissues <- args[3:length(args)]
 
 input_anno <- str_glue("{indir}/ref/GCF_036323735.1_GRCr8_genomic.chr.gtf")
-input_signif_template <- "{indir}/v4/{tissue}/{tissue}.cis_qtl_signif.txt.gz"
+input_signif_template <- "{indir}/v4/{tissue}/{tissue}.expression.cis_qtl_signif.txt.gz"
 input_expr_template <- "{indir}/v4/{tissue}/phenos/output/expression.bed.gz"
 input_eqtl_indep <- str_glue("{outdir}/eqtl/eqtls_indep.v4_rn8.tsv")
 input_top_assoc <- str_glue("{outdir}/eqtl/top_assoc.v4_rn8.tsv")

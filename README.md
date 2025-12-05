@@ -11,15 +11,15 @@ This code is designed to run only the latest RatGTEx data version, but files are
 
 - `tissue_info.tsv`: Tab-delimited table of basic information about each tissue, e.g. full name and color to use in website visualizations.
 - `geno/{geno_dataset}.vcf.gz{,.tbi}`: Genotype files, each including the individuals for one or more tissues.
-- `geno/alleles.txt.gz`: Three-column tab-delimited file with variant ID, REF, and ALT alleles for the union of SNPs extracted from the genotype VCF files.
+- `geno/alleles.tsv.gz`: Three-column tab-delimited file with variant ID, REF, and ALT alleles for the union of SNPs extracted from the genotype VCF files.
 - `geno/genotyping_log.csv`: CSV metadata file containing sex and coat color info to add to the rat info table.
 - `samples/{accession}_series_matrix.txt.gz`: GEO series metadata for each tissue whose RNA-Seq data has been added to GEO. When a tissue is added to GEO, download this file for the series (not the superseries in case of multitissue datasets) and add the accession to `sample_table.R`.
 - `ref/GCF_036323735.1_GRCr8_genomic.chr.gtf`
 - `ref/GCF_036323735.1_GRCr8_genomic.chr.genes.gtf`
 - `v4/{tissue}/fastq_map.txt`
 - `v4/{tissue}/rat_ids.txt`
-- `v4/{tissue}/{tissue}.aFC.txt`
-- `v4/{tissue}/{tissue}.cis_qtl_all_pvals.txt.gz`
+- `v4/{tissue}/{tissue}.aFC.tsv`
+- `v4/{tissue}/{tissue}.cis_qtl_all_pvals.tsv.gz`
 - `v4/{tissue}/{tissue}.{modality}.cis_qtl_signif.txt.gz`
 - `v4/{tissue}/{tissue}.expr.log2.bed.gz`
 - `v4/{tissue}/{tissue}.expression.trans_qtl_pairs.txt.gz`
@@ -36,11 +36,11 @@ This code is designed to run only the latest RatGTEx data version, but files are
 - `exon.v4.tsv`
 - `gene.v4.tsv`
 - `medianGeneExpression.v4.tsv.gz`
-- `singleTissueEqtl.v4.zip`
 - `tissue_info.v4.tsv`
 - `topExpressedGene.v4.tsv`
 - `cis_pvals/{tissue}.v4.zip`
 - `covar/covar.{tissue}.{modality}.v4.tsv`
+- `eqtl/all_gene_esnps.v4.zip`
 - `eqtl/eqtls_indep.v4_rn8.tsv`
 - `eqtl/top_assoc.v4_rn8.tsv`
 - `expr/expr.{log2,tpm}.{tissue}.v4_rn8.bed.gz`

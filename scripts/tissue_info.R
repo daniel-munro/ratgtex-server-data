@@ -11,7 +11,7 @@ version <- "v4"
 
 input_tissue <- str_glue("{indir}/tissue_info.tsv")
 input_expr_template <- "{indir}/{version}/{tissue}/phenos/output/expression.bed.gz"
-input_assoc <- str_glue("{outdir}/eqtl/top_assoc.{version}_rn8.txt")
+input_assoc <- str_glue("{outdir}/eqtl/top_assoc.{version}_rn8.tsv")
 
 output <- str_glue("{outdir}/tissue_info.{version}.tsv")
 
