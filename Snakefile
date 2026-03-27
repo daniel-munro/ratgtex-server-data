@@ -113,7 +113,7 @@ rule sample_table:
         geno_log = "../ratgtex/geno/genotyping_log.csv",
         geo = expand(
             "../ratgtex/samples/{accession}_series_matrix.txt.gz",
-            accession=["GSE201236", "GSE173137", "GSE173138", "GSE173136", "GSE173140", "GSE173139"]
+            accession=["GSE196572", "GSE319591", "GSE201236", "GSE173137", "GSE173138", "GSE200453", "GSE173136", "GSE325482", "GSE173140", "GSE173139", "GSE325425", "GSE325426", "GSE325609"]
         ),
         rat_ids = expand("../ratgtex/v4/{tissue}/rat_ids.txt", tissue=tissues_separate),
     output:

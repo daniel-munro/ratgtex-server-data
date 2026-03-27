@@ -5,7 +5,7 @@ suppressPackageStartupMessages(library(tidyverse))
 field_values <- function(lines, field_name, keyword = NULL) {
   # Some field names are not unique, so a keyword can be supplied that must
   # be present anywhere in the line, e.g. "BioSample" or "SRA"
-  if (!is.null(keyword)) {
+  if (!is.null(keyword) && !is.na(keyword)) {
     lines <- str_subset(lines, keyword)
   }
   lines |>
@@ -16,10 +16,10 @@ field_values <- function(lines, field_name, keyword = NULL) {
     c()
 }
 
-load_geo <- function(filename, trim_ids = FALSE) {
+load_geo <- function(filename, rat_id_field = "Sample_title", rat_id_keyword = NULL) {
   lines <- read_lines(filename)
-  geo <- tibble(
-    rat_id = field_values(lines, "Sample_title"),
+  tibble(
+    rat_id = field_values(lines, rat_id_field, rat_id_keyword),
     GEO_accession = field_values(lines, "Sample_geo_accession"),
     BioSample_accession = field_values(lines, "Sample_relation", "BioSample"),
     SRA_accession = field_values(lines, "Sample_relation", "SRA"),
@@ -36,11 +36,6 @@ load_geo <- function(filename, trim_ids = FALSE) {
         ""
       ),
     )
-  if (trim_ids) { # Remove tissue name from IDs in older submissions
-    geo <- geo |>
-      mutate(rat_id = str_replace(rat_id, "_.+$", ""))
-  }
-  geo
 }
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -58,21 +53,82 @@ output_samples_html <- str_glue("{outdir}/ref/samples.v4.html")
 output_rats_html <- str_glue("{outdir}/ref/rats.v4.html")
 
 accession <- c(
+  Adipose = "GSE196572",
+  # BLA = "GSE325265",
+  Brain = "GSE319591",
   Eye = "GSE201236",
+  # IC = "GSE322804",
   IL = "GSE173137",
   LHb = "GSE173138",
+  Liver = "GSE200453",
   NAcc1 = "GSE173136",
+  # NAcc2 = "GSE325286",
+  NAcc3 = "GSE325482",
+  # NAcc4 = "GSE322805",
   OFC = "GSE173140",
-  PL1 = "GSE173139"
+  PL1 = "GSE173139",
+  # PL2 = "GSE325288",
+  PL3 = "GSE325425",
+  pVTA1 = "GSE325426",
+  # pVTA2 = "GSE322806",
+  RMTg = "GSE325609"
 )
-to_trim <- c("IL", "LHb", "NAcc1", "OFC", "PL1") # IDs have tissue appended to rat ID
 
 stopifnot(any(tissues %in% names(accession)))
 geo <- tibble(tissue = tissues) |>
   filter(tissue %in% names(accession)) |>
   reframe(
-    load_geo(str_glue(input_geo_template), tissue %in% to_trim),
+    load_geo(
+      str_glue(input_geo_template),
+      rat_id_field = if_else(
+        tissue == "Liver",
+        "Sample_characteristics_ch1",
+        "Sample_title"
+      ),
+      rat_id_keyword = if_else(
+        tissue == "Liver",
+        "sample_common_id_with adipose_tissue",
+        NA_character_
+      )
+    ),
     .by = tissue
+  ) |>
+  mutate(
+    # IDs have tissue appended to rat ID
+    rat_id = if_else(
+      tissue %in% c("IL", "LHb", "NAcc1", "OFC", "PL1"),
+      str_replace(rat_id, "_.+$", ""),
+      rat_id
+    ),
+    # RFIDs are stored in a different metadata field
+    rat_id = if_else(
+      tissue == "Liver",
+      str_replace(rat_id, "sample_common_id_with adipose_tissue: ", ""),
+      rat_id
+    ),
+    # IDs use underscore instead of hyphen
+    rat_id = if_else(
+      tissue %in% c("Adipose", "Liver"),
+      str_replace(rat_id, "_", "-"),
+      rat_id
+    ),
+    # GEO added arbitrary suffixes to some RFIDs
+    rat_id = if_else(
+      tissue == "NAcc3",
+      str_replace(rat_id, fixed(" (Nacc)"), ""),
+      rat_id
+    ),
+    rat_id = if_else(
+      tissue == "PL3",
+      str_replace(rat_id, ", PL", ""),
+      rat_id
+    ),
+    rat_id = if_else(
+      tissue == "pVTA1",
+      str_replace(rat_id, ", pVTA", ""),
+      rat_id
+    ),
+
   )
 
 samples <- tibble(tissue = tissues) |>
