@@ -86,6 +86,7 @@ rule gene_info:
     """Process gene info table"""
     input:
         gtf = "../ratgtex/ref/GCF_036323735.1_GRCr8_genomic.chr.gtf",
+        twas_models = "../rat-twas-hub/data/all_models.tsv",
         signif = expand("../ratgtex/v4/{tissue}/{tissue}.expression.cis_qtl_signif.txt.gz", tissue=tissues_merged),
         expr = expand("../ratgtex/v4/{tissue}/phenos/output/expression.bed.gz", tissue=tissues_merged),
         eqtl = "data/v4/eqtl/eqtls_indep.v4_rn8.tsv",
@@ -96,7 +97,7 @@ rule gene_info:
     params:
         tissues = tissues_merged
     shell:
-        "Rscript scripts/gene.R ../ratgtex data/v4 {params.tissues}"
+        "Rscript scripts/gene.R ../ratgtex data/v4 {input.twas_models} {params.tissues}"
 
 rule exon_table:
     """Prepare exon annotations for server API"""

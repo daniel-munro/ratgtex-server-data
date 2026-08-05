@@ -5,7 +5,8 @@ suppressPackageStartupMessages(library(tidyverse))
 args <- commandArgs(trailingOnly = TRUE)
 indir <- args[1]
 outdir <- args[2]
-tissues <- args[3:length(args)]
+input_twas_models <- args[3]
+tissues <- args[4:length(args)]
 
 input_anno <- str_glue("{indir}/ref/GCF_036323735.1_GRCr8_genomic.chr.gtf")
 input_signif_template <- "{indir}/v4/{tissue}/{tissue}.expression.cis_qtl_signif.txt.gz"
@@ -15,6 +16,14 @@ input_top_assoc <- str_glue("{outdir}/eqtl/top_assoc.v4_rn8.tsv")
 
 output_gene <- str_glue("{outdir}/gene.v4.tsv")
 output_autocomplete <- str_glue("{outdir}/autocomplete.v4.json")
+
+twas_genes <- read_tsv(
+  input_twas_models,
+  col_types = cols(ID = "c", .default = "-")
+) |>
+  transmute(gene_id = str_replace(ID, "__.+$", "")) |>
+  distinct() |>
+  pull()
 
 genes <- read_tsv(
   input_anno,
@@ -90,7 +99,10 @@ has_eqtl <- read_tsv(input_eqtl_indep, col_types = "cc---------------") |>
 ## Assemble
 
 df <- genes |>
-  mutate(hasEqtl = if_else(geneId %in% signif, "True", "False")) |>
+  mutate(
+    hasEqtl = if_else(geneId %in% signif, "True", "False"),
+    hasTwas = if_else(geneId %in% twas_genes, "True", "False")
+  ) |>
   left_join(is_expr, by = c("geneId" = "gene_id"), relationship = "one-to-one") |>
   left_join(was_tested_eqtl, by = c("geneId" = "gene_id"), relationship = "one-to-one") |>
   left_join(has_eqtl, by = c("geneId" = "gene_id"), relationship = "one-to-one")

@@ -16,6 +16,7 @@ This code is designed to run only the latest RatGTEx data version, but files are
 - `samples/{accession}_series_matrix.txt.gz`: GEO series metadata for each tissue whose RNA-Seq data has been added to GEO. When a tissue is added to GEO, download this file for the series (not the superseries in case of multitissue datasets) and add the accession to `sample_table.R`.
 - `ref/GCF_036323735.1_GRCr8_genomic.chr.gtf`
 - `ref/GCF_036323735.1_GRCr8_genomic.chr.genes.gtf`
+- `../rat-twas-hub/data/all_models.tsv`: Rat TWAS Hub model inventory used to mark genes with Hub pages.
 - `v4/{tissue}/fastq_map.txt`
 - `v4/{tissue}/rat_ids.txt`
 - `v4/{tissue}/{tissue}.aFC.tsv`
