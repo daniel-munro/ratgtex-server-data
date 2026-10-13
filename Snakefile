@@ -21,6 +21,7 @@ localrules:
     copy_geno_files,
     copy_expr_log2,
     copy_expr_tpm,
+    copy_mash_tissue_gene_leads,
     copy_phenos_unnorm,
     copy_phenos_norm,
     median_gene_expression,
@@ -56,6 +57,7 @@ rule all:
         "data/v4/eqtl/eqtls_indep.v4_rn8.tsv",
         ##
         "data/v4/eqtl/all_gene_esnps.v4.zip",
+        "data/v4/mash/mash_tissue_gene_leads.expression.v4_rn8.tsv.gz",
         ##
         expand("data/v4/xqtl/top_assoc.{modality}.v4_rn8.tsv", modality=modalities + ["cross_modality"]),
         expand("data/v4/xqtl/xqtls_indep.{modality}.v4_rn8.tsv", modality=modalities + ["cross_modality"]),
@@ -214,6 +216,16 @@ rule copy_phenos_norm:
 #######################
 ## eQTL and all xQTL ##
 #######################
+
+rule copy_mash_tissue_gene_leads:
+    """Copy cross-tissue mash expression leads, retaining all gene-tissue rows."""
+    input:
+        "../rat-pantry/data/mashr/expression/summary/tissue_gene_leads.tsv.gz"
+    output:
+        "data/v4/mash/mash_tissue_gene_leads.expression.v4_rn8.tsv.gz"
+    shell:
+        "cp {input:q} {output:q}"
+
 
 rule eqtl_combined_files:
     """Process and aggregate eQTL results from tensorQTL"""
